@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # Copyright (c) 2026, Mirocom Laboratories
 # All rights reserved.
@@ -9,15 +10,7 @@
 # consent from Mirocom Laboratories.
 #
 
-include mk/sys.mk
-
-.PHONY: all
-all: sp1 boot
-
-.PHONY: boot
-boot:
-	cd boot/; $(MAKE)
-
-.PHONY: sp1
-sp1:
-	cd sp1/; $(MAKE) $(PASSDOWN_ARGS)
+if [ ! -d stand/limine ]; then
+	git clone https://codeberg.org/Limine/Limine.git --branch=v10.x-binary --depth=1 stand/limine
+    make -C stand/limine
+fi

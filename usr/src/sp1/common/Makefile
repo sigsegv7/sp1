@@ -16,6 +16,7 @@ CC = ../../../../$(SYS_CC)
 
 CFLAGS = 			\
 	$(SYS_CFLAGS)   \
+	-I../head		\
 	-D_KERNEL		\
 	-MMD			\
 	-DPRINTF_DISABLE_SUPPORT_PTRDIFF_T \
