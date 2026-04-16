@@ -9,26 +9,20 @@
 # consent from Mirocom Laboratories.
 #
 
-ASMFILES = $(shell find . -name "*.S")
-ASMOFILES = $(ASMFILES:.S=.S.o)
-MISC_OFILES = $(shell find ../common -name "*.o")
+CFILES = $(shell find os/ -name "*.c")
+OFILES = $(CFILES:.c=.o)
 
-CC = 				\
-	../../../../$(SYS_CC)
-
-LD =				\
-	../../../../$(SYS_LD)
+CC = ../../../../$(SYS_CC)
 
 CFLAGS = 			\
-	$(SYS_CFLAGS)
+	$(SYS_CFLAGS)   \
+	-D_KERNEL		\
+	-MMD			\
+	-DPRINTF_DISABLE_SUPPORT_PTRDIFF_T \
+	-DPRINTF_DISABLE_SUPPORT_FLOAT
 
 .PHONY: all
-all: $(ASMOFILES)
-	$(LD) 			   \
-		-Tconf/link.ld \
-		$(MISC_OFILES) \
-		$(ASMOFILES)   \
-		-o ../../../../sp1.sys
+all: $(OFILES)
 
-%.S.o: %.S
-	$(CC) -c $(CFLAGS) $< -o $@
+%.o: %.c
+	$(CC) -c $< $(CFLAGS) -o $@

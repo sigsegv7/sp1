@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Copyright (c) 2026, Mirocom Laboratories
 # All rights reserved.
@@ -11,7 +10,11 @@
 #
 
 .PHONY: all
-all: $(ARCH)
+all: common $(ARCH)
+
+.PHONY: common
+common:
+	cd common; $(MAKE)
 
 .PHONY: $(ARCH)
 $(ARCH):

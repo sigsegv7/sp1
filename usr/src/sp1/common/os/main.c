@@ -9,16 +9,7 @@
  * consent from Mirocom Laboratories.
  */
 
-    .text
-    .globl _start
-    .extern main
-_start:
-    cli
-    cld
-
-    xor %rbp, %rbp
-    call main
-
-    cli
-1:  hlt
-    jmp 1b
+void
+main(void)
+{
+}
