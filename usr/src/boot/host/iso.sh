@@ -14,12 +14,16 @@ set -e
 
 ISO=../../../sp1.iso
 CONFIG=../data/boot/limine.conf
+WALLPAPER=../data/boot/wallpaper.jpg
 KERNEL=../../../sp1.sys
 
 mkdir -p iso_root/boot/
 
 # Copy the kernel to the ISO root
 cp $KERNEL iso_root/boot
+
+# Copy the wallpaper to the ISO root
+cp $WALLPAPER iso_root/boot
 
 # Copy boot files
 cp $CONFIG stand/limine/limine-bios.sys \
