@@ -14,6 +14,13 @@
 
 #include <sys/types.h>
 #include <machine/mcb.h>    /* shared */
+#include <machine/cpudef.h> /* shared */
+
+/* cpudef.h glue */
+#define mu_cpu_halt md_cpu_halt             /* Halt current core */
+#define mu_cpu_wait md_cpu_wait             /* Spinwait hint */
+#define mu_cpu_intoff md_cpu_intoff         /* Disable interrupts */
+#define mu_cpu_inton md_cpu_inton           /* Enable interrupts */
 
 /*
  * MI processor specific information
