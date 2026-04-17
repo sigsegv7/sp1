@@ -21,7 +21,7 @@
 extern "C" {
 #endif
 
-#include <compat/posix/stdint.h>
+#include <sys/types.h>
 
 /* Misc */
 
