@@ -12,6 +12,7 @@
 #include <mu/cpu.h>
 #include <lib/printf.h>
 #include <machine/cpuid.h>
+#include <machine/idt.h>
 #include <stdbool.h>
 
 #define pr_trace(fmt, ...) \
@@ -87,4 +88,7 @@ mu_cpu_preinit(struct cpu_info *ci)
 
     /* Log out some information */
     cpu_print_info(ci);
+
+    /* Load the IDT */
+    md_idt_load();
 }
