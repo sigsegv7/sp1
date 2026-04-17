@@ -10,7 +10,12 @@
 #
 
 .PHONY: all
-all: common $(ARCH)
+all: target common $(ARCH)
+
+.PHONY: target
+target:
+	mkdir -p head/target/machine/
+	rsync -avr head/$(ARCH)/*.h head/target/machine/
 
 .PHONY: common
 common:

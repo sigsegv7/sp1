@@ -22,6 +22,7 @@ CC = ../../../../$(SYS_CC)
 CFLAGS = 			\
 	$(SYS_CFLAGS)   \
 	-I../head		\
+	-I../head/target/ \
 	-I../../head	\
 	-I../ext/flanterm/src/ \
 	-D_KERNEL		\

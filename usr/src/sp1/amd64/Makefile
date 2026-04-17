@@ -24,10 +24,11 @@ CC = 				\
 LD =				\
 	../../../../$(SYS_LD)
 
-CFLAGS = 			\
-	$(SYS_CFLAGS)   \
-	-I../../head    \
-	-I../../sp1/head\
+CFLAGS = 					\
+	$(SYS_CFLAGS)   		\
+	-I../../head    		\
+	-I../../sp1/head/target \
+	-I../../sp1/head		\
 	-D_KERNEL
 
 .PHONY: all
