@@ -13,14 +13,17 @@
 #define _MU_CPU_H_ 1
 
 #include <sys/types.h>
+#include <machine/mcb.h>    /* shared */
 
 /*
  * MI processor specific information
  *
  * @id:   Processor ID
+ * @mcb:  Machine core block
  */
 struct cpu_info {
     uint8_t id;
+    struct mcb mcb;
 };
 
 /*
