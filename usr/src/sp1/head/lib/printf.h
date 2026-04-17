@@ -4,23 +4,19 @@
  *
  * The following sources are CONFIDENTIAL and PROPRIETARY
  * property of Mirocom Laboratories. Unauthorized copying,
- * use, distribution or modification of this file, in whole
+ * use, distrubution or modification of this file, in whole
  * and in part, is strictly prohibited without the prior written
  * consent from Mirocom Laboratories.
  */
 
-#include <io/cons/cons.h>
-#include <lib/printf.h>
+#ifndef _LIB_PRINTF_H_
+#define _LIB_PRINTF_H_ 1
 
-/* Root console attribute */
-struct cons_attr cons_attr = {
-    .fg = 0x808080,
-    .bg = 0x000000
-};
+#include <lib/_printf.h>
 
-void
-main(void)
-{
-    /* Initialize the console */
-    cons_init(&cons_attr);
-}
+/* Aliases to follow style convention */
+#define Printf      printf
+#define FmtBuf      snprintf
+#define VFmtBuf     vsnprintf
+
+#endif  /* !_LIB_PRINTF_H_ */

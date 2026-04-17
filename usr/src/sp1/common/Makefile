@@ -10,13 +10,20 @@
 #
 
 CFILES = $(shell find os/ -name "*.c")
+CFILES += $(shell find io/ -name "*.c")
+CFILES += $(shell find ../ext -name "*.c")
+CFILES += $(shell find ../lib -name "*.c")
+
 OFILES = $(CFILES:.c=.o)
+DFILES = $(CFILES:.c=.d)
 
 CC = ../../../../$(SYS_CC)
 
 CFLAGS = 			\
 	$(SYS_CFLAGS)   \
 	-I../head		\
+	-I../../head	\
+	-I../ext/flanterm/src/ \
 	-D_KERNEL		\
 	-MMD			\
 	-DPRINTF_DISABLE_SUPPORT_PTRDIFF_T \
@@ -25,5 +32,6 @@ CFLAGS = 			\
 .PHONY: all
 all: $(OFILES)
 
+-include $(DFILES)
 %.o: %.c
 	$(CC) -c $< $(CFLAGS) -o $@

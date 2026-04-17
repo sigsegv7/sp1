@@ -4,7 +4,7 @@
  *
  * The following sources are CONFIDENTIAL and PROPRIETARY
  * property of Mirocom Laboratories. Unauthorized copying,
- * use, distribution or modification of this file, in whole
+ * use, distrubution or modification of this file, in whole
  * and in part, is strictly prohibited without the prior written
  * consent from Mirocom Laboratories.
  */
@@ -12,15 +12,8 @@
 #include <io/cons/cons.h>
 #include <lib/printf.h>
 
-/* Root console attribute */
-struct cons_attr cons_attr = {
-    .fg = 0x808080,
-    .bg = 0x000000
-};
-
 void
-main(void)
+_putchar(char c)
 {
-    /* Initialize the console */
-    cons_init(&cons_attr);
+    cons_write(&c, 1);
 }
