@@ -11,7 +11,9 @@
 
 ASMFILES = $(shell find . -name "*.S")
 ASMOFILES = $(ASMFILES:.S=.S.o)
-MISC_OFILES = $(shell find ../common -name "*.o")
+
+MISC_OFILES = $(shell find ../ -name "*.o")
+LIB_OFILES = $(shell find ../../lib/ -name "*.o")
 
 CC = 				\
 	../../../../$(SYS_CC)
@@ -27,7 +29,7 @@ all: $(ASMOFILES)
 	$(LD) 			   \
 		-Tconf/link.ld \
 		$(MISC_OFILES) \
-		$(ASMOFILES)   \
+		$(LIB_OFILES)  \
 		-o ../../../../sp1.sys
 
 %.S.o: %.S

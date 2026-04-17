@@ -9,19 +9,14 @@
 # consent from Mirocom Laboratories.
 #
 
-include mk/sys.mk
+CFILES = $(shell find . -name "*.c")
+OFILES = $(CFILES:.c=.o)
+
+CC = ../../../../$(SYS_CC)
+CFLAGS = $(SYS_CFLAGS) -I../../head -D_SP1_SOURCE
 
 .PHONY: all
-all: lib sp1 boot
+all: $(OFILES)
 
-.PHONY: lib
-lib:
-	cd lib/; $(MAKE)
-
-.PHONY: boot
-boot:
-	cd boot/; $(MAKE)
-
-.PHONY: sp1
-sp1:
-	cd sp1/; $(MAKE) $(PASSDOWN_ARGS)
+%.o: %.c
+	$(CC) -c $< $(CFLAGS) -o $@

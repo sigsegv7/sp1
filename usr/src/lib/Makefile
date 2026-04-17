@@ -9,19 +9,11 @@
 # consent from Mirocom Laboratories.
 #
 
-include mk/sys.mk
+include ../mk/sys.mk
 
 .PHONY: all
-all: lib sp1 boot
+all: libstr
 
-.PHONY: lib
-lib:
-	cd lib/; $(MAKE)
-
-.PHONY: boot
-boot:
-	cd boot/; $(MAKE)
-
-.PHONY: sp1
-sp1:
-	cd sp1/; $(MAKE) $(PASSDOWN_ARGS)
+.PHONY: libstr
+libstr:
+	cd libstr/; $(MAKE) $(PASSDOWN_ARGS)
