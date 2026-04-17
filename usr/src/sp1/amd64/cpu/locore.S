@@ -22,3 +22,24 @@ _start:
     cli
 1:  hlt
     jmp 1b
+
+    .globl md_cpu_init
+    .set IA32_EFER, 0xC0000080
+md_cpu_init:
+    push %r12
+    push %r13
+    push %r14
+    push %r15
+    push %rbx
+
+    mov $IA32_EFER, %ecx    // IA32_EFER
+    rdmsr                   // -> EDX:EAX
+    or $1<<11, %eax         // Set NXE
+    wrmsr                   // Write it back
+
+    pop %rbx
+    pop %r15
+    pop %r14
+    pop %r13
+    pop %r12
+    retq

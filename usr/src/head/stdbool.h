@@ -9,7 +9,7 @@
  * consent from Mirocom Laboratories.
  */
 
-#ifndef _STDBOOL_H_ 1
+#ifndef _STDBOOL_H_
 #define _STDBOOL_H_ 1
 
 #ifndef _HAVE_bool

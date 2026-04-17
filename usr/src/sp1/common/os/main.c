@@ -11,11 +11,15 @@
 
 #include <io/cons/cons.h>
 #include <lib/printf.h>
+#include <mu/cpu.h>
 
 #define KERNEL_VERSION "0.0.1"
 
+/* Bootstrap processor */
+static struct cpu_info bsp;
+
 /* Root console attribute */
-struct cons_attr cons_attr = {
+static struct cons_attr cons_attr = {
     .fg = 0x808080,
     .bg = 0x000000
 };
@@ -35,4 +39,7 @@ main(void)
 
     /* Write the boot console */
     boot_banner();
+
+    /* Pre-init the processor */
+    mu_cpu_preinit(&bsp);
 }
