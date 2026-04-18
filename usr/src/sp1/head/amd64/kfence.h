@@ -34,4 +34,4 @@
     swapgs                ; \
 1:  nop
 
-#endif  /* !_MACHINE_KFENCE_H_ *
+#endif  /* !_MACHINE_KFENCE_H_ */
