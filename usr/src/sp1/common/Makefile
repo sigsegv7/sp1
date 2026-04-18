@@ -12,6 +12,7 @@
 CFILES = $(shell find os/ -name "*.c")
 CFILES += $(shell find io/ -name "*.c")
 CFILES += $(shell find bpt/ -name "*.c")
+CFILES += $(shell find mm/ -name "*.c")
 CFILES += $(shell find ../ext -name "*.c")
 CFILES += $(shell find ../lib -name "*.c")
 
