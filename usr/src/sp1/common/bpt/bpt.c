@@ -37,6 +37,20 @@ bpt_get_protovar(struct bpt_protovar *res)
 }
 
 status_t
+bpt_mem_entry_i(size_t index, struct mem_entry *res)
+{
+    if (res == NULL) {
+        return STATUS_INVALID_PARAM;
+    }
+
+    if (ops.mem_entry_i == NULL) {
+        return STATUS_IO_ERROR;
+    }
+
+    return ops.mem_entry_i(index, res);
+}
+
+status_t
 bpt_init(void)
 {
     switch (*BOOT_PROTO) {

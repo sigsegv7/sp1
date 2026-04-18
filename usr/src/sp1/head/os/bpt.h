@@ -16,6 +16,34 @@
 #include <sys/status.h>
 
 /*
+ * Memory map entry types
+ */
+typedef enum {
+    MEMORY_USABLE,
+    MEMORY_RESERVED,
+    MEMORY_ACPI_RECLAIM,
+    MEMORY_ACPI_NVS,
+    MEMORY_BAD,
+    MEMORY_BOOTLOADER,
+    MEMORY_KERNEL,
+    MEMORY_FRAMEBUFFER,
+    MEMORY_ACPI_TABLES
+} mem_type_t;
+
+/*
+ * Represents a memory map entry
+ *
+ * @base:   Entry base address
+ * @length: Entry length
+ * @type:   Entry type
+ */
+struct mem_entry {
+    uintptr_t base;
+    size_t length;
+    mem_type_t type;
+};
+
+/*
  * The protovar stores a list of information passed
  * by the bootloader.
  *
@@ -30,6 +58,7 @@ struct bpt_protovar {
  */
 struct bpt_ops {
     status_t(*get_protovar)(struct bpt_protovar *res);
+    status_t(*mem_entry_i)(size_t index, struct mem_entry *res);
 };
 
 /*
@@ -38,6 +67,13 @@ struct bpt_ops {
  * @res: Result is written here
  */
 status_t bpt_get_protovar(struct bpt_protovar *res);
+
+/*
+ * Obtain a memory map entry by index
+ *
+ * Returns STATUS_NOT_FOUND on failure
+ */
+status_t bpt_mem_entry_i(size_t index, struct mem_entry *res);
 
 /*
  * Initialize the boot protocol translation layer
