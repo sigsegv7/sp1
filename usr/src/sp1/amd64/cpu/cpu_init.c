@@ -89,6 +89,9 @@ mu_cpu_preinit(struct cpu_info *ci)
     /* Log out some information */
     cpu_print_info(ci);
 
+    /* Set interrupt vectors */
+    md_set_vectors();
+
     /* Load the IDT */
     md_idt_load();
 }

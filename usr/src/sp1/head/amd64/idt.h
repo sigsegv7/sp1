@@ -61,5 +61,11 @@ void md_idt_set_gate(uint8_t vector, uintptr_t isr, uint8_t type, uint8_t ist);
  */
 void md_idt_load(void);
 
+
+/*
+ * Set all interrupt vectors
+ */
+void md_set_vectors(void);
+
 #endif  /* !__ASSEMBLER__ */
 #endif  /* !_MACHINE_IDT_H_ */
