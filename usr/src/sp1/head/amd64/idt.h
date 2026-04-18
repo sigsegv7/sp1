@@ -39,7 +39,10 @@ struct idt_gate {
 };
 
 /*
- * Points to
+ * Points to the IDT base
+ *
+ * @limit: IDT limit
+ * @base:  IDT base address
  */
 struct __packed idtr {
     uint16_t  limit;
