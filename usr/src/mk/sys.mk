@@ -11,6 +11,7 @@
 
 CC_PREFIX = x86_64-pc-mirocom
 ARCH_TARGET = amd64
+BOOT_PROTO = limine
 
 CC = \
 	var/cc/toolchain/gcc/bin/$(CC_PREFIX)-gcc
@@ -28,7 +29,7 @@ SYS_CFLAGS =			\
 	-mcmodel=kernel		\
 	-Wno-attributes		\
 	-fno-stack-protector\
-	-D_SP1_MULTICORE
+	-D_SP1_MULTICORE    \
 
 ifeq ($(ARCH_TARGET),x86_64)
 	SYS_CFLAGS += 		\
@@ -46,4 +47,5 @@ PASSDOWN_ARGS = \
 	ARCH=$(ARCH_TARGET)		\
 	SYS_CC=$(CC)			\
 	SYS_LD=$(LD)			\
-	SYS_CFLAGS="$(SYS_CFLAGS)"
+	SYS_CFLAGS="$(SYS_CFLAGS)" \
+	BOOT_PROTO="\"$(BOOT_PROTO)\""

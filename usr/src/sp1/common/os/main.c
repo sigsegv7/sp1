@@ -10,6 +10,7 @@
  */
 
 #include <io/cons/cons.h>
+#include <os/bpt.h>
 #include <lib/printf.h>
 #include <mu/cpu.h>
 
@@ -42,4 +43,7 @@ main(void)
 
     /* Pre-init the processor */
     mu_cpu_preinit(&bsp);
+
+    /* Initialize boot protocol translation layer */
+    bpt_init();
 }

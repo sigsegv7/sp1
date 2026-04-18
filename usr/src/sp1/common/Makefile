@@ -11,6 +11,7 @@
 
 CFILES = $(shell find os/ -name "*.c")
 CFILES += $(shell find io/ -name "*.c")
+CFILES += $(shell find bpt/ -name "*.c")
 CFILES += $(shell find ../ext -name "*.c")
 CFILES += $(shell find ../lib -name "*.c")
 
@@ -28,7 +29,8 @@ CFLAGS = 			\
 	-D_KERNEL		\
 	-MMD			\
 	-DPRINTF_DISABLE_SUPPORT_PTRDIFF_T \
-	-DPRINTF_DISABLE_SUPPORT_FLOAT
+	-DPRINTF_DISABLE_SUPPORT_FLOAT     \
+	-D_BOOT_PROTO="\"$(BOOT_PROTO)\""
 
 .PHONY: all
 all: $(OFILES)
