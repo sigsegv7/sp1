@@ -12,6 +12,7 @@
 #ifndef _OS_BPT_H_
 #define _OS_BPT_H_ 1
 
+#include <sys/cdefs.h>
 #include <sys/types.h>
 #include <sys/status.h>
 
@@ -82,5 +83,20 @@ status_t bpt_init(void);
 
 /* Boot protocol specific init funcs */
 status_t bpt_init_limine(struct bpt_ops *ops);
+
+/*
+ * Obtain the kernel load base from the bootloader
+ */
+__always_inline static inline uintptr_t
+bpt_kload_base(void)
+{
+    struct bpt_protovar pv;
+
+    if (bpt_get_protovar(&pv) != STATUS_SUCCESS) {
+        return 0;
+    }
+
+    return pv.kload_base;
+}
 
 #endif  /* !_OS_BPT_H_ */
