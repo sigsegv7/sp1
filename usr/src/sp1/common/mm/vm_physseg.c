@@ -12,9 +12,13 @@
 #include <sys/param.h>
 #include <sys/units.h>
 #include <mm/physmem.h>
+#include <mm/vm.h>
 #include <mu/param.h>
 #include <lib/printf.h>
 #include <os/bpt.h>
+#include <string.h>
+
+#define MEM_SCAN_START 0x00100000
 
 #define pr_trace(fmt, ...) \
     printf("physseg: " fmt, ##__VA_ARGS__)
@@ -45,6 +49,11 @@ static const char *typetab[] = {
 static uintptr_t highest_usable;
 static size_t mem_total = 0;
 static size_t mem_usable = 0;
+static size_t bitmap_size = 0;
+static size_t last_idx = 0;
+static size_t bitmap_free_start = 0;
+static size_t highest_frame_idx = 0;
+static uint8_t *bitmap;
 
 static inline void
 physmem_print_size(const char *title, size_t len)
@@ -59,6 +68,142 @@ physmem_print_size(const char *title, size_t len)
         pr_trace("... %d MiB %s\n", len / UNIT_MIB, title);
     } else {
         pr_trace("... %d bytes %s\n", len, title);
+    }
+}
+
+/*
+ * Populate physical memory bitmap.
+ */
+static void
+physmem_bitmap_fill(void)
+{
+    struct mem_entry entry;
+    status_t status;
+
+    for (size_t i = 0;; ++i) {
+        status = bpt_mem_entry_i(i, &entry);
+
+        /* Are there no more entries? */
+        if (status != STATUS_SUCCESS) {
+            break;
+        }
+
+        if (entry.base < MEM_SCAN_START) {
+            continue;
+        }
+
+        if (bitmap_free_start == 0) {
+            bitmap_free_start = entry.base / PAGESIZE;
+        }
+
+        for (size_t j = 0; j < entry.length; j += PAGESIZE) {
+            CLRBIT(bitmap, (entry.base + j) / PAGESIZE);
+        }
+    }
+}
+
+/*
+ * Allocate memory used for the bitmap
+ */
+static void
+physmem_bitmap_alloc(void)
+{
+    struct mem_entry entry;
+    status_t status;
+
+    for (size_t i = 0;; ++i) {
+        status = bpt_mem_entry_i(i, &entry);
+
+        /* Are there no more entries? */
+        if (status != STATUS_SUCCESS) {
+            break;
+        }
+
+        if (entry.type != MEMORY_USABLE) {
+            continue;
+        }
+
+        if (entry.length < bitmap_size) {
+            continue;
+        }
+
+        bitmap = pma_to_vma(entry.length);
+        memset(bitmap, 0xFFFFFFFF, bitmap_size);
+        break;
+    }
+
+    physmem_bitmap_fill();
+}
+
+/*
+ * Allocate page frames.
+ *
+ * @count: Number of frames to allocate.
+ */
+static uintptr_t
+__physmem_alloc_frame(size_t count)
+{
+    size_t frames = 0;
+    ssize_t idx = -1;
+    uintptr_t ret = 0;
+
+    for (size_t i = last_idx; i < highest_frame_idx; ++i) {
+        if (!TESTBIT(bitmap, i)) {
+            if (idx < 0)
+                idx = i;
+            if (++frames >= count)
+                break;
+
+            continue;
+        }
+
+        idx = -1;
+        frames = 0;
+    }
+
+    if (idx < 0 || frames != count) {
+        ret = 0;
+        goto done;
+    }
+
+    for (size_t i = idx; i < idx + count; ++i) {
+        SETBIT(bitmap, i);
+    }
+    ret = idx * PAGESIZE;
+    last_idx = idx;
+    memset(pma_to_vma(ret), 0, count * PAGESIZE);
+done:
+    return ret;
+}
+
+uintptr_t
+mm_physmem_alloc(size_t count)
+{
+   uintptr_t ret;
+
+    if (count == 0) {
+        return 0;
+    }
+
+    if ((ret = __physmem_alloc_frame(count)) == 0) {
+        last_idx = 0;
+        ret = __physmem_alloc_frame(count);
+    }
+
+    return ret;
+}
+
+/*
+ * Central frame freeing routine
+ */
+void
+pmm_free_frame(uintptr_t base, size_t count)
+{
+    size_t stop_at = base + (count * PAGESIZE);
+
+    base = ALIGN_UP(base, PAGESIZE);
+    for (uintptr_t p = base; p < stop_at; p += PAGESIZE) {
+        CLRBIT(bitmap, p / PAGESIZE);
     }
 }
 
@@ -102,10 +247,17 @@ physmem_probe(void)
         mem_usable += entry.length;
     }
 
+    /* Obtain the size of the bitmap */
+    highest_frame_idx = highest_usable / PAGESIZE;
+    bitmap_size = highest_frame_idx / 8;
+
     /* Print memory stats */
     pr_trace("begin stats\n");
     physmem_print_size("usable", mem_usable);
     physmem_print_size("total", mem_total);
+
+    /* Allocate a new bitmap */
+    physmem_bitmap_alloc();
 }
 
 void
