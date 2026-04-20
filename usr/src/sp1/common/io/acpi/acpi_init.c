@@ -15,6 +15,7 @@
 #include <os/knot.h>
 #include <os/bpt.h>
 #include <mm/vm.h>
+#include <string.h>
 
 #define pr_trace(fmt, ...) \
     printf("acpi: " fmt, ##__VA_ARGS__)
@@ -51,6 +52,27 @@ rsdp_verify(void)
     if ((csum & 0xFF) != 0) {
         knot("bad checksum %x for acpi rsdp\n", csum);
     }
+}
+
+void *
+acpi_query(const char *signature)
+{
+    struct acpi_header *hdr;
+    uintptr_t pma;
+
+    if (signature == NULL) {
+        return NULL;
+    }
+
+    for (size_t i = 0; i < root_sdt_entries; ++i) {
+        pma = (uintptr_t)root_sdt->tables[i];
+        hdr = (struct acpi_header *)pma_to_vma(pma);
+        if (memcmp(hdr->signature, signature, sizeof(hdr->signature)) == 0) {
+            return (void *)hdr;
+        }
+    }
+
+    return NULL;
 }
 
 void

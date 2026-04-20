@@ -17,4 +17,14 @@
  */
 void acpi_init(void);
 
+/*
+ * Query an ACPI table through its signature
+ *
+ * @signature: Signature to lookup
+ *
+ * Returns the virtual table base on success, otherwise
+ * NULL on failure.
+ */
+void *acpi_query(const char *signature);
+
 #endif  /* !_ACPI_ACPI_H_ */
