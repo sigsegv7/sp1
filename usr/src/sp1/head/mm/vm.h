@@ -24,4 +24,9 @@
 #define vma_to_pma(vma) \
     (uintptr_t)PTR_NOFFSET(vma, bpt_kload_base())
 
+/*
+ * Initialize the virtual memory management
+ */
+void mm_vm_init(void);
+
 #endif  /* !_MM_VM_H_ */

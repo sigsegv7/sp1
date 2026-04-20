@@ -15,6 +15,7 @@
 #include <lib/printf.h>
 #include <mu/cpu.h>
 #include <mm/physmem.h>
+#include <mm/vm.h>
 
 #define KERNEL_VERSION "0.0.1"
 
@@ -51,6 +52,9 @@ main(void)
 
     /* Initialize physical memory management */
     mm_physmem_init();
+
+    /* Initialize virtual memory management */
+    mm_vm_init();
 
     printf("[*] sp1 is pre-alpha\n");
     printf("[*] knotting kernel...\n");

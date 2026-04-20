@@ -12,6 +12,8 @@
 #ifndef _MU_MMU_H_
 #define _MU_MMU_H_ 1
 
+#include <sys/status.h>
+
 /*
  * Each running SP1 process is to have a virtual fuck region
  * which logically isolates their address space with the help
@@ -32,5 +34,13 @@ void mu_mmu_readvfr(struct mmu_vfr *res);
  * @vfr: Virtual fuck region to set
  */
 void mu_mmu_writevfr(struct mmu_vfr *vfr);
+
+/*
+ * Fork a VFR and clear out the lower half
+ *
+ * @vfr: Virtual fuck region to fork
+ * @res: Virtual fuck region result written here
+ */
+status_t mu_mmu_forkvfr(struct mmu_vfr *vfr, struct mmu_vfr *res);
 
 #endif  /* !_MU_MMU_H_ */
