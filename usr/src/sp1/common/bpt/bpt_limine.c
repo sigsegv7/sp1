@@ -27,6 +27,13 @@ static volatile struct limine_hhdm_request hhdm_req = {
     .revision = 0
 };
 
+/* ACPI RSDP request */
+static struct limine_rsdp_response *rsdp_resp = NULL;
+static volatile struct limine_rsdp_request rsdp_req = {
+    .id = LIMINE_RSDP_REQUEST,
+    .revision = 0
+};
+
 /*
  * Obtain the boot protocol variables
  *
@@ -40,6 +47,7 @@ limine_get_protovar(struct bpt_protovar *res)
     }
 
     res->kload_base = hhdm_resp->offset;
+    res->rsdp = rsdp_resp->address;
     return STATUS_SUCCESS;
 }
 
@@ -80,6 +88,7 @@ bpt_init_limine(struct bpt_ops *ops)
 
     hhdm_resp = hhdm_req.response;
     memmap_resp = memmap_req.response;
+    rsdp_resp = rsdp_req.response;
 
     ops->get_protovar = limine_get_protovar;
     ops->mem_entry_i = limine_mem_entry_i;

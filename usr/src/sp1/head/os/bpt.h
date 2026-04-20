@@ -52,6 +52,7 @@ struct mem_entry {
  */
 struct bpt_protovar {
     uintptr_t kload_base;
+    void *rsdp;
 };
 
 /*
