@@ -10,6 +10,7 @@
  */
 
 #include <io/cons/cons.h>
+#include <io/acpi/acpi.h>
 #include <os/bpt.h>
 #include <os/knot.h>
 #include <lib/printf.h>
@@ -55,6 +56,9 @@ main(void)
 
     /* Initialize virtual memory management */
     mm_vm_init();
+
+    /* Initialize ACPI */
+    acpi_init();
 
     printf("[*] sp1 is pre-alpha\n");
     printf("[*] knotting kernel...\n");
