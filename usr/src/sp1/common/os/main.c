@@ -18,7 +18,7 @@
 #include <mm/physmem.h>
 #include <mm/vm.h>
 
-#define KERNEL_VERSION "0.0.1"
+#define KERNEL_VERSION "0.0.2"
 
 /* Bootstrap processor */
 static struct cpu_info bsp;
@@ -34,6 +34,7 @@ boot_banner(void)
 {
     printf("-- sp1/amd64 %s --\n", KERNEL_VERSION);
     printf("yiff!~ preparing syspaw for you!... <3\n");
+    printf("i love you, you matter - stay, stay\n");
 }
 
 void
