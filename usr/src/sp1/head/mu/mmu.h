@@ -13,6 +13,17 @@
 #define _MU_MMU_H_ 1
 
 #include <sys/status.h>
+#include <sys/mman.h>
+
+/*
+ * Represents valid page sizes that can be used when
+ * creating mappings
+ */
+typedef enum {
+    PAGESIZE_4K,
+    PAGESIZE_2M,
+    PAGESIZE_1G
+} pagesize_t;
 
 /*
  * Each running SP1 process is to have a virtual fuck region
@@ -34,6 +45,22 @@ void mu_mmu_readvfr(struct mmu_vfr *res);
  * @vfr: Virtual fuck region to set
  */
 void mu_mmu_writevfr(struct mmu_vfr *vfr);
+
+/*
+ * Create a virtual to physical mapping within a
+ * specific virtual fuck region
+ *
+ * @vfr:  Virtual fuck region to map within
+ * @vma:  Virtual memory address to map
+ * @pma:  Physical memory address to map to
+ * @prot: Protection flags
+ * @pagesize_t: Pagesize to map
+ */
+status_t mu_mmu_map(
+    struct mmu_vfr *vfr, uintptr_t vma,
+    uintptr_t pma, int prot,
+    pagesize_t ps
+);
 
 /*
  * Fork a VFR and clear out the lower half
