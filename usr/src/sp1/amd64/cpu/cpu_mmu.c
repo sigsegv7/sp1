@@ -16,6 +16,7 @@
 #include <mm/vm.h>
 #include <mm/physmem.h>
 #include <machine/tlb.h>
+#include <machine/param.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -174,7 +175,7 @@ mmu_extract_level(struct mmu_vfr *vfr, uintptr_t vma, pagelvl_t lvl, bool alloc)
         }
 
         tmp_p = pma_to_vma(pma);
-        memset(tmp_p, 0, 4096);
+        memset(tmp_p, 0, PAGESIZE);
         pmap[index] = pma | (PTE_P | PTE_RW | PTE_US);
 
         pmap = tmp_p;
