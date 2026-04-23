@@ -265,5 +265,4 @@ mu_mmu_map(struct mmu_vfr *vfr, uintptr_t vma, uintptr_t pma,
     tbl[index] = pma | flags;
     md_tlb_flush(vma);
     return STATUS_SUCCESS;
-
 }
