@@ -12,8 +12,25 @@
 #ifndef _MM_VM_H_
 #define _MM_VM_H_ 1
 
+#include <sys/types.h>
 #include <sys/param.h>
 #include <os/bpt.h>
+#include <mu/mmu.h>
+
+/*
+ * Represents a virtual memory mapping that can be made
+ *
+ * @ps:       Pagesize
+ * @vma_base: Virtual memory base
+ * @pma_base: Physical memory base
+ * @length:   Number of bytes to map
+ */
+struct vm_map {
+    pagesize_t ps;
+    uintptr_t vma_base;
+    uintptr_t pma_base;
+    size_t length;
+};
 
 /*
  * Macros used to convert physical to virtual addresses
@@ -23,6 +40,14 @@
     PTR_OFFSET((void *)pma, bpt_kload_base())
 #define vma_to_pma(vma) \
     (uintptr_t)PTR_NOFFSET(vma, bpt_kload_base())
+
+/*
+ * Create a virtual memory mapping
+ *
+ * @vfr:     Virtual fuck region to map within
+ * @mapping: Mapping to create
+ */
+status_t mm_vm_map(struct mmu_vfr *vfr, struct vm_map *mapping, int prot);
 
 /*
  * Initialize the virtual memory management
