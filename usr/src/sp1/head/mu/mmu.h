@@ -16,6 +16,13 @@
 #include <sys/mman.h>
 
 /*
+ * Each running SP1 process is to have a virtual fuck region
+ * which logically isolates their address space with the help
+ * of the platform memory management unit.
+ */
+#include <machine/vfr.h>    /* shared; virtual fuck region~ */
+
+/*
  * Represents valid page sizes that can be used when
  * creating mappings
  */
@@ -24,13 +31,6 @@ typedef enum {
     PAGESIZE_2M,
     PAGESIZE_1G
 } pagesize_t;
-
-/*
- * Each running SP1 process is to have a virtual fuck region
- * which logically isolates their address space with the help
- * of the platform memory management unit.
- */
-#include <machine/vfr.h>    /* shared; virtual fuck region~ */
 
 /*
  * Obtain the current VFR in-use
