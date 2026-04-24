@@ -16,6 +16,7 @@
 #include <os/bpt.h>
 #include <mm/vm.h>
 #include <string.h>
+#include <machine/irqchip.h>    /* shared */
 
 #define pr_trace(fmt, ...) \
     printf("acpi: " fmt, ##__VA_ARGS__)
@@ -101,4 +102,6 @@ acpi_init(void)
         root_sdt = pma_to_vma((uintptr_t)rsdp->xsdt_addr);
         root_sdt_entries = (root_sdt->hdr.length - sizeof(root_sdt->hdr)) / 8;
     }
+
+    md_irqchip_init();
 }
