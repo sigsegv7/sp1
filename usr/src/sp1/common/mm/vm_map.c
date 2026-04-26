@@ -46,6 +46,8 @@ mm_vm_map(struct mmu_vfr *vfr, struct vm_map *mapping, int prot)
     gran = GRAN(mapping->ps);
     vma = ALIGN_DOWN(mapping->vma_base, gran);
     pma = ALIGN_DOWN(mapping->pma_base, gran);
+
+    len = mapping->length;
     len = ALIGN_UP(len + (len & (gran - 1)), gran);
 
     for (size_t i = 0; i < len; i += gran) {
@@ -73,6 +75,8 @@ mm_vm_unmap(struct mmu_vfr *vfr, struct vm_map *mapping)
 
     gran = GRAN(mapping->ps);
     vma = ALIGN_DOWN(mapping->vma_base, gran);
+
+    len = mapping->length;
     len = ALIGN_UP(len + (len & (gran - 1)), gran);
 
     for (size_t i = 0; i < len; i += gran) {
