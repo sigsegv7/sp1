@@ -51,14 +51,32 @@ mm_vm_map(struct mmu_vfr *vfr, struct vm_map *mapping, int prot)
     for (size_t i = 0; i < len; i += gran) {
         status = mu_mmu_map(vfr, vma + i, pma + i, prot, mapping->ps);
 
-        /*
-         * TODO: We need to clean up here instead of leaving a big hole
-         *       when this fails.
-         */
+        /* Destroy what we created on failure */
         if (status != STATUS_SUCCESS) {
-            pr_trace("mapping failed, leaked %d bytes\n", len);
+            mm_vm_unmap(vfr, mapping);
             return status;
         }
+    }
+
+    return STATUS_SUCCESS;
+}
+
+status_t
+mm_vm_unmap(struct mmu_vfr *vfr, struct vm_map *mapping)
+{
+    size_t gran, len;
+    uintptr_t vma;
+
+    if (vfr == NULL || mapping == NULL) {
+        return STATUS_INVALID_PARAM;
+    }
+
+    gran = GRAN(mapping->ps);
+    vma = ALIGN_DOWN(mapping->vma_base, gran);
+    len = ALIGN_UP(len + (len & (gran - 1)), gran);
+
+    for (size_t i = 0; i < len; i += gran) {
+        mu_mmu_unmap(vfr, vma + i, mapping->ps);
     }
 
     return STATUS_SUCCESS;

@@ -24,6 +24,8 @@
  * @vma_base: Virtual memory base
  * @pma_base: Physical memory base
  * @length:   Number of bytes to map
+ *
+ * XXX: `pma_base' is unused when unmapping regions
  */
 struct vm_map {
     pagesize_t ps;
@@ -48,6 +50,14 @@ struct vm_map {
  * @mapping: Mapping to create
  */
 status_t mm_vm_map(struct mmu_vfr *vfr, struct vm_map *mapping, int prot);
+
+/*
+ * Destroy a virtual memory mapping
+ *
+ * @vfr:  Virtual fuck region to unmap within
+ * @mapping: Mapping to destroy
+ */
+status_t mm_vm_unmap(struct mmu_vfr *vfr, struct vm_map *mapping);
 
 /*
  * Initialize the virtual memory management
