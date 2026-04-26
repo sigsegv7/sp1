@@ -63,6 +63,19 @@ status_t mu_mmu_map(
 );
 
 /*
+ * Destroy a virtual memory mapping in the virtual
+ * fuck region
+ *
+ * @vfr: Virtual fuck region to unmap within
+ * @vma: Virtual memory address to unmap
+ * @ps:  Pagesize of address to unmap
+ */
+status_t mu_mmu_unmap(
+    struct mmu_vfr *vfr, uintptr_t vma,
+    pagesize_t ps
+);
+
+/*
  * Fork a VFR and clear out the lower half
  *
  * @vfr: Virtual fuck region to fork

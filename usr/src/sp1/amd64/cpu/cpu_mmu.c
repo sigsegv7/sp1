@@ -267,3 +267,24 @@ mu_mmu_map(struct mmu_vfr *vfr, uintptr_t vma, uintptr_t pma,
     md_tlb_flush(vma);
     return STATUS_SUCCESS;
 }
+
+status_t
+mu_mmu_unmap(struct mmu_vfr *vfr, uintptr_t vma, pagesize_t ps)
+{
+    uintptr_t *tbl;
+    size_t index;
+
+    if (vfr == NULL) {
+        return STATUS_INVALID_PARAM;
+    }
+
+    tbl = mmu_extract_level(vfr, vma, PAGELVL_PML1, false);
+    if (tbl == NULL) {
+        return STATUS_NOT_FOUND;
+    }
+
+    index = mmu_extract_index(vma, PAGELVL_PML1);
+    tbl[index] = 0;
+    md_tlb_flush(vma);
+    return STATUS_SUCCESS;
+}
