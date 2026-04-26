@@ -44,8 +44,6 @@ mm_vm_map(struct mmu_vfr *vfr, struct vm_map *mapping, int prot)
     }
 
     gran = GRAN(mapping->ps);
-    len = mapping->length;
-
     vma = ALIGN_DOWN(mapping->vma_base, gran);
     pma = ALIGN_DOWN(mapping->pma_base, gran);
     len = ALIGN_UP(len + (len & (gran - 1)), gran);
