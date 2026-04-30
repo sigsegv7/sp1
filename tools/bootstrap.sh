@@ -34,7 +34,7 @@ check_deps() {
 #
 get_toolchain() {
     if [ ! -d var/cc/toolchain ]; then
-        git clone https://git.mirocom.org/Mirocom/mirocom-toolchain --depth=1 var/cc/toolchain
+        git clone https://git.mirocom.org/chloe/mirocom-toolchain --depth=1 var/cc/toolchain
         cd var/cc/toolchain
         tar -xzvf toolchain.tar.gz
         mv public/* .; rm -rf public/
