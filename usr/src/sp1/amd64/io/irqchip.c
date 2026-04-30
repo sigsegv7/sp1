@@ -16,12 +16,47 @@
 #include <machine/irqchip.h>
 #include <io/acpi/acpi.h>
 #include <io/acpi/tables.h>
+#include <mm/vm.h>
 
 #define pr_trace(fmt, ...) \
     printf("irqchip: " fmt, ##__VA_ARGS__)
 
 /* Online capable */
 #define LAPIC_ONLCAP BIT(1)
+
+/* I/O APIC */
+static struct irqchip ioapic_list[MAX_IOAPIC];
+static size_t ioapic_count = 0;
+
+/* Local APIC */
+static struct irqchip lapic_list[MAX_LAPIC];
+static size_t lapic_count = 0;
+
+/*
+ * Add a Local APIC descriptor
+ */
+static inline void
+irqchip_lapic_append(const struct irqchip *irqchip)
+{
+    if (lapic_count >= MAX_LAPIC) {
+        return;
+    }
+
+    lapic_list[lapic_count++] = *irqchip;
+}
+
+/*
+ * Add an I/O APIC descriptor
+ */
+static inline void
+irqchip_ioapic_append(const struct irqchip *irqchip)
+{
+    if (ioapic_count >= MAX_IOAPIC) {
+        return;
+    }
+
+    ioapic_list[ioapic_count++] = *irqchip;
+}
 
 /*
  * Print information about a Local APIC unit
@@ -63,6 +98,7 @@ irqchip_print_ioapic(struct ioapic *ioapic)
 status_t
 md_irqchip_init(void)
 {
+    struct irqchip chip;
     struct acpi_madt *madt;
     struct local_apic *lapic;
     struct ioapic *ioapic;
@@ -84,13 +120,41 @@ md_irqchip_init(void)
         case APIC_TYPE_LOCAL_APIC:
             lapic = (struct local_apic *)hdr;
             irqchip_print_lapic(lapic);
+
+            chip.mmio = pma_to_vma(madt->lapic_addr);
+            chip.apic_id = lapic->apic_id;
+            irqchip_lapic_append(&chip);
             break;
         case APIC_TYPE_IO_APIC:
             ioapic = (struct ioapic *)hdr;
             irqchip_print_ioapic(ioapic);
+
+            chip.mmio = pma_to_vma(ioapic->ioapic_addr);
+            chip.apic_id = ioapic->ioapic_id;
+            irqchip_lapic_append(&chip);
             break;
         }
 
         cur += hdr->length;
     }
+}
+
+struct irqchip *
+md_ioapic_index(size_t index)
+{
+    if (index >= ioapic_count) {
+        return NULL;
+    }
+
+    return &ioapic_list[index];
+}
+
+struct irqchip *
+md_lapic_index(size_t index)
+{
+    if (index >= lapic_count) {
+        return NULL;
+    }
+
+    return &lapic_list[index];
 }
