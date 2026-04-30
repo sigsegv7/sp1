@@ -39,7 +39,7 @@ struct vm_map {
  * and vice versa.
  */
 #define pma_to_vma(pma) \
-    PTR_OFFSET((void *)pma, bpt_kload_base())
+    PTR_OFFSET((void *)((uintptr_t)pma), bpt_kload_base())
 #define vma_to_pma(vma) \
     (uintptr_t)PTR_NOFFSET(vma, bpt_kload_base())
 
