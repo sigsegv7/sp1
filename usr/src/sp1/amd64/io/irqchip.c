@@ -137,6 +137,8 @@ md_irqchip_init(void)
 
         cur += hdr->length;
     }
+
+    return STATUS_SUCCESS;
 }
 
 struct irqchip *
