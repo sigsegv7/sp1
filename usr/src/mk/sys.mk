@@ -9,14 +9,20 @@
 # consent from Mirocom Laboratories.
 #
 
-CC_PREFIX = x86_64-pc-mirocom
+CC_PREFIX =
 ARCH_TARGET = amd64
 BOOT_PROTO = limine
 
+ifeq ($(ARCH_TARGET), amd64)
+	CC_TARGET = x86_64-unknown-elf
+else
+	CC_TARGET =
+endif
+
 CC = \
-	var/cc/toolchain/gcc/bin/$(CC_PREFIX)-gcc
+	clang
 LD = \
-    var/cc/toolchain/build-binutils/bin/$(CC_PREFIX)-ld
+	 ld
 AR = \
 	var/cc/toolchain/build-binutils/bin/$(CC_PREFIX)-ar
 
@@ -25,7 +31,7 @@ SYS_CFLAGS =			\
 	-nostdinc			\
 	-ffreestanding		\
 	-fexceptions		\
-	--std=gnu11			\
+	-target $(CC_TARGET)\
 	-mcmodel=kernel		\
 	-Wno-attributes		\
 	-fno-stack-protector\

@@ -19,10 +19,10 @@ MISC_OFILES = $(shell find ../ -name "*.o")
 LIB_OFILES = $(shell find ../../lib/ -name "*.o")
 
 CC = 				\
-	../../../../$(SYS_CC)
+	$(SYS_CC)
 
 LD =				\
-	../../../../$(SYS_LD)
+	$(SYS_LD)
 
 CFLAGS = 					\
 	$(SYS_CFLAGS)   		\

@@ -12,7 +12,7 @@
 CFILES = $(shell find . -name "*.c")
 OFILES = $(CFILES:.c=.o)
 
-CC = ../../../../$(SYS_CC)
+CC = $(SYS_CC)
 CFLAGS = $(SYS_CFLAGS) -I../../head -D_SP1_SOURCE
 
 .PHONY: all

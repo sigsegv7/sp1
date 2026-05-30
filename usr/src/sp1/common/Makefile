@@ -19,7 +19,7 @@ CFILES += $(shell find ../lib -name "*.c")
 OFILES = $(CFILES:.c=.o)
 DFILES = $(CFILES:.c=.d)
 
-CC = ../../../../$(SYS_CC)
+CC = clang
 
 CFLAGS = 			\
 	$(SYS_CFLAGS)   \
