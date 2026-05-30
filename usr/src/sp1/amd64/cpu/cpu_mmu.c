@@ -74,15 +74,15 @@ mmu_prot_to_pte(int prot)
  *
  * @ps: Pagesize to verify
  */
-static bool
-mmu_ps_valid(pagelvl_t ps)
+static inline bool
+mmu_ps_valid(pagesize_t ps)
 {
     switch (ps) {
     case PAGESIZE_4K:
         return true;
+    default:
+        return false;
     }
-
-    return false;
 }
 
 /*
