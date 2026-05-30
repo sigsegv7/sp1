@@ -42,19 +42,9 @@ get_toolchain() {
     fi
 }
 
-#
-# Obtain all deps
-#
-get_deps() {
-    get_toolchain
-}
-
 # Make sure everything is installed
 check_deps   \
     git     \
     make    \
     gcc     \
     xorriso
-
-# Obtain all the deps we need
-get_deps
