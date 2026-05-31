@@ -9,15 +9,18 @@
  * consent from Mirocom Laboratories.
  */
 
+#include <sys/types.h>
 #include <sys/param.h>
 #include <sys/cdefs.h>
 #include <machine/lapic.h>
 #include <machine/lapicreg.h>
+#include <machine/cpuid.h>
 #include <machine/msr.h>
 #include <os/knot.h>
 #include <mu/mmio.h>
 #include <lib/printf.h>
 #include <mm/vm.h>
+#include <stdbool.h>
 
 /* IA32_APIC_BASE_MSR bits */
 #define APIC_IS_BSP BIT(8)
@@ -34,6 +37,19 @@
             printf("lapic: " fmt, ##__VA_ARGS__);   \
         }                                           \
     } while (0);
+
+/*
+ * Returns true if the processor contains a Local APIC
+ * unit.
+ */
+static inline bool
+lapic_is_present(void)
+{
+    uint64_t unused, edx;
+
+    __cpuid(0x01, unused, unused, unused, edx);
+    return ISSET(edx, BIT(9)) != 0;
+}
 
 /*
  * Read a value from the Local APIC register space
@@ -139,6 +155,11 @@ md_lapic_init(struct cpu_info *ci)
 
     if (ci == NULL) {
         return STATUS_INVALID_PARAM;
+    }
+
+    /* XXX: SP1 relies on Local APIC */
+    if (!lapic_is_present()) {
+        knot("processor does not have Local APIC unit");
     }
 
     mcb = &ci->mcb;
