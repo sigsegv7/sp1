@@ -78,6 +78,7 @@ md_hpet_init(void)
         knot("got bad hpet revision id in general config\n");
     }
 
+    /* Clock period must be valid */
     if (__unlikely(clk_period == 0 || clk_period > HPET_MAX_CLK_PERIOD)) {
         knot("got bad hpet clk period :: 0x%x\n", clk_period);
     }
