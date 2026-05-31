@@ -39,6 +39,21 @@ md_idt_set_gate(uint8_t vector, uintptr_t isr, uint8_t type, uint8_t ist)
     gate->segment_sel = GDT_KCODE;
 }
 
+uint8_t
+md_idt_alloc(uint64_t isr, uint8_t type, uint8_t ist)
+{
+    static uint8_t vector = 0x20;
+    uint8_t ret_vector;
+
+    if (vector == 0xFF) {
+        return 0;
+    }
+
+    ret_vector = vector++;
+    md_idt_set_gate(ret_vector, ist, type, ist);
+    return ret_vector;
+}
+
 void
 md_idt_load(void)
 {

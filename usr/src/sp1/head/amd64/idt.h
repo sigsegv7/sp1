@@ -64,6 +64,17 @@ void md_idt_set_gate(uint8_t vector, uintptr_t isr, uint8_t type, uint8_t ist);
  */
 void md_idt_load(void);
 
+/*
+ * Set an IDT gate descriptor while allocating a vector
+ *
+ * @isr:  Interrupt service routine base
+ * @type: Gate descriptor type
+ * @ist:  Interrupt stack table index
+ *
+ * Returns the allocator vector on success, otherwise zero
+ * on failure.
+ */
+uint8_t md_idt_alloc(uint64_t isr, uint8_t type, uint8_t ist);
 
 /*
  * Set all interrupt vectors
