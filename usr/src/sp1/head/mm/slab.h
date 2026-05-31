@@ -55,14 +55,4 @@ struct slab_mag {
  */
 status_t slab_mag_init(struct slab_mag *mag);
 
-/*
- * Allocate memory from a magazine
- *
- * @mag:  Magazine to allocate from
- * @sz:   Requested size to allocate
- *
- * Returns NULL on failure
- */
-void *slab_allocate(struct slab_mag *mag, size_t sz);
-
 #endif  /* !_MM_SLAB_H_ */

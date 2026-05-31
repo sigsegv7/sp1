@@ -89,16 +89,6 @@ slab_init(struct slab *slab)
     return STATUS_SUCCESS;
 }
 
-void *
-slab_allocate(struct slab_mag *mag, size_t sz)
-{
-    if (mag == NULL || sz == 0) {
-        return NULL;
-    }
-
-    sz = ALIGN_UP(sz, 2);
-}
-
 status_t
 slab_mag_init(struct slab_mag *mag)
 {
