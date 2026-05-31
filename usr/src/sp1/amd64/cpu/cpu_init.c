@@ -142,5 +142,5 @@ mu_cpu_postinit(struct cpu_info *ci)
     }
 
     /* Initialize the Local APIC unit */
-    md_lapic_init();
+    md_lapic_init(ci);
 }
