@@ -24,4 +24,8 @@
 /* Constants */
 #define HPET_MAX_CLK_PERIOD 0x05F5E100
 
+/* General config bits */
+#define HPET_GCONF_EN       BIT(0)  /* Overall enable */
+#define HPET_GCONF_LEG_RT   BIT(1)  /* Legacy replacement route */
+
 #endif  /* !_MACHINE_HPETREG_H_ */

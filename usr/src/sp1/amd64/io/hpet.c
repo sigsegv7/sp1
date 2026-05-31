@@ -43,12 +43,26 @@ hpet_mmio_read(uint16_t offset)
     return mmio_read64(base);
 }
 
+static inline void
+hpet_mmio_write(uint16_t offset, uint64_t v)
+{
+    void *base;
+
+    if (hpet_mmio64 == NULL) {
+        return;
+    }
+
+    base = PTR_OFFSET(hpet_mmio64, offset);
+    mmio_write64(base, v);
+}
+
+
 status_t
 md_hpet_init(void)
 {
     struct acpi_hpet *hpet_desc;
     struct acpi_gas *gas;
-    uint64_t gen_cap;
+    uint64_t gen_cap, gen_conf;
     uint32_t clk_period;
     uint8_t rev_id, tmr_cnt;
 
@@ -85,5 +99,12 @@ md_hpet_init(void)
 
     pr_trace("timer count :: %d\n", tmr_cnt);
     pr_trace("clk period  :: %d fs\n", clk_period);
+
+    /* Enable timer with counter in known state */
+    hpet_mmio_write(HPET_MAIN_CNT, 0);
+    gen_conf = hpet_mmio_read(HPET_GENERAL_CONF);
+    gen_conf |= HPET_GCONF_EN;
+    hpet_mmio_write(HPET_GENERAL_CONF, gen_conf);
+
     return STATUS_SUCCESS;
 }
