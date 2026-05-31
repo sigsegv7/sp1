@@ -17,6 +17,7 @@
 #include <mu/cpu.h>
 #include <mm/physmem.h>
 #include <mm/vm.h>
+#include <mu/board.h>
 
 #define KERNEL_VERSION "0.0.2"
 
@@ -60,6 +61,9 @@ main(void)
 
     /* Initialize ACPI */
     acpi_init();
+
+    /* Initialize board components */
+    mu_board_init();
 
     /* Post-init the processor */
     mu_cpu_postinit(&bsp);
