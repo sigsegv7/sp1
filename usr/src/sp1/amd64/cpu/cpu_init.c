@@ -13,6 +13,7 @@
 #include <lib/printf.h>
 #include <machine/cpuid.h>
 #include <machine/idt.h>
+#include <machine/lapic.h>
 #include <stdbool.h>
 
 #define pr_trace(fmt, ...) \
@@ -131,4 +132,15 @@ mu_cpu_preinit(struct cpu_info *ci)
 
     /* Load the IDT */
     md_idt_load();
+}
+
+void
+mu_cpu_postinit(struct cpu_info *ci)
+{
+    if (ci == NULL) {
+        return;
+    }
+
+    /* Initialize the Local APIC unit */
+    md_lapic_init();
 }

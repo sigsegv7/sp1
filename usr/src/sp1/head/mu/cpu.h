@@ -40,4 +40,10 @@ struct cpu_info {
  */
 void mu_cpu_preinit(struct cpu_info *ci);
 
+/*
+ * Routine used later on after mu_cpu_preinit() to initialize
+ * processor specific components.
+ */
+void mu_cpu_postinit(struct cpu_info *ci);
+
 #endif  /* !_MU_CPU_H_ */

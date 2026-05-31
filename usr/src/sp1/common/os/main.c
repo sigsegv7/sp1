@@ -61,6 +61,9 @@ main(void)
     /* Initialize ACPI */
     acpi_init();
 
+    /* Post-init the processor */
+    mu_cpu_postinit(&bsp);
+
     printf("[*] sp1 is pre-alpha\n");
     printf("[*] knotting kernel...\n");
     knot("end of kernel reached - halting\n");
