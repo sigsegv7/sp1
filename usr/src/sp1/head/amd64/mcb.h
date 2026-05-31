@@ -18,12 +18,16 @@
  * The machine core block contains MD processor
  * specific information
  *
- * @model_id:  Processor model ID
- * @family_id: Processor family ID
+ * @model_id:       Processor model ID
+ * @family_id:      Processor family ID
+ * @lapic_mmio:     xAPIC MMIO base
+ * @x2apic_enabled: If set, x2APIC is enabled
  */
 struct mcb {
     uint8_t model_id;
     uint16_t family_id : 12;
+    void *lapic_mmio;
+    uint8_t x2apic_enabled : 1;
 };
 
 #endif  /* !_MACHINE_MCB_H_ */

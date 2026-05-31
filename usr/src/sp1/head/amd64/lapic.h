@@ -13,10 +13,11 @@
 #define _MACHINE_LAPIC_H_
 
 #include <sys/status.h>
+#include <mu/cpu.h>
 
 /*
  * Initialize the Local APIC
  */
-status_t md_lapic_init(void);
+status_t md_lapic_init(struct cpu_info *ci);
 
 #endif  /* !_MACHINE_LAPIC_H_ */
