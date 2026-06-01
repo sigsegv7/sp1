@@ -23,4 +23,8 @@
 #define __likely(exp)   __builtin_expect(((exp) != 0), 1)
 #define __unlikely(exp) __builtin_expect(((exp) != 0), 0)
 
+#ifndef offsetof
+#define offsetof(st, m) ((size_t)&(((st *)0)->m))
+#endif  /* offsetof */
+
 #endif  /* !_SYS_CDEFS_H_ */
