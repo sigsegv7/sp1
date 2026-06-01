@@ -17,6 +17,7 @@
 #include <mu/cpu.h>
 #include <mm/physmem.h>
 #include <mm/vm.h>
+#include <mm/kalloc.h>
 #include <mu/board.h>
 
 #define KERNEL_VERSION "0.0.2"
@@ -55,6 +56,9 @@ main(void)
 
     /* Initialize physical memory management */
     mm_physmem_init();
+
+    /* Initialize the main allocator */
+    kalloc_init();
 
     /* Initialize virtual memory management */
     mm_vm_init();
