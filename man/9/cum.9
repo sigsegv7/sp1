@@ -1,0 +1,77 @@
+.Dd May 31 2026
+.Dt CUM 9
+.Os SP1
+.Sh NAME
+.Nm cum - component unified-access manager
+.Sh SYNOPSIS
+.In os/cum.h
+
+.Sh DESCRIPTION
+The Component Unified-access Manager (CUM) is responsible for providing a hierarchal namespace made up of categorized opaque
+objects used to represent devices, filesystems and kernel objects. It is comparable to a VFS in pure unix-like systems but more
+comparable to an object manager in systems such as NT.
+
+A CUM descriptor is a linked-list data structure used to contain CUM objects of a specific category, each CUM object is to have standardized
+metadata along with an opaque data reference that points to internal subsystem specific data. All devices, kernel interfaces and components of the
+like are to fit in a specific category which is referred as a
+.Ft domain
+.
+
+Each domain is to have its own subsystem, referred to as a
+.Ft Domain Manager (DM)
+.
+
+Upon a successful lookup of a CUM object through its path, one may interface with the resolved object by passing it to routines exposed
+by a respective DM of a specific domain.
+
+The idea behind CUM is that rather than everything being a file, everything is instead a state machine. Below is a concept program for user-space access:
+
+.nf
+.ft C
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+some_state_t *t;
+int cd;
+
+t = malloc(sizeof(*t));
+...
+cd = sopen("dev.ether0", ...);
+...
+sbind(cd, t);   // Bind to cum object
+t->something = 3;
+spoke(t);       // Notify kernel, flush u2k
+
+// Can read data on the fly without system call overhead for update requests.
+// Explicit notifications are only needed for write flushing.
+
+sunbind(t);     // Unbind object
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+.ft R
+.fi
+
+To avoid data races, global mutable state within each FSM is to be split into a K2U side (Kernel-to-User) as well as a U2K (User-To-Kernel) side. Due to
+the potential for high-frequency data alteration, it is recommended that FSMs are aligned to the cache-line coherency unit to avoid false sharing that may
+choke up the bus.
+
+.nf
+.ft C
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+struct foo_u2k {
+    uint16_t u_bufsz;
+    uint8_t u_foo;
+};
+
+struct foo_k2u {
+    uint16_t k_bufsz;
+    uint8_t k_foo;
+};
+
+struct foo_state {
+    int bind_cd;  // component descriptor
+    __cacheline_aligned struct foo_u2k u2k;
+    __cacheline_aligned struct foo_k2u k2u;
+    ...
+};
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+.ft R
+.fi
