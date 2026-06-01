@@ -30,4 +30,9 @@ int memcmp(const void *s1, const void *s2, size_t n);
  */
 void *memcpy(void *dest, const void *src, size_t count);
 
+/*
+ * Obtain the length of a string 's'
+ */
+size_t strlen(const char *s);
+
 #endif  /* _STRING_H_ */
