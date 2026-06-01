@@ -48,6 +48,7 @@ typedef __int64_t   int64_t;
 typedef __ssize_t ssize_t;
 typedef __ssize_t intmax_t;
 
+typedef ssize_t ptrdiff_t;
 #endif  /* !_KERNEL || _SP1_SOURCE */
 
 typedef int pid_t;
