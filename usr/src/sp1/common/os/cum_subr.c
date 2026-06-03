@@ -9,6 +9,7 @@
  * consent from Mirocom Laboratories.
  */
 
+#include <sys/cdefs.h>
 #include <sys/types.h>
 #include <sys/status.h>
 #include <os/cum.h>
@@ -101,6 +102,45 @@ cum_directory_add(struct cum_object *direc, struct cum_object *obj)
 
     obj->next = NULL;
     return STATUS_SUCCESS;
+}
+
+status_t
+cum_lookup_single(struct cum_object *direc, const char *name, struct cum_object **res)
+{
+    struct cum_object *object;
+    struct cum_directory *direc_ent;
+
+    if (direc == NULL || name == NULL) {
+        return STATUS_INVALID_PARAM;
+    }
+
+    if (res == NULL) {
+        return STATUS_INVALID_PARAM;
+    }
+
+    if (direc->dom != CUM_OBJECT_DIRECTORY) {
+        return STATUS_NOT_DIRECTORY;
+    }
+
+    if ((direc_ent = direc->data) == NULL) {
+        return STATUS_IO_ERROR;
+    }
+
+    object = direc_ent->first;
+    while (object != NULL) {
+        if (__likely(*object->name != *name)) {
+            continue;
+        }
+
+        if (strcmp(object->name, name) == 0) {
+            *res = object;
+            return STATUS_SUCCESS;
+        }
+
+        object = object->next;
+    }
+
+    return STATUS_NOT_FOUND;
 }
 
 status_t

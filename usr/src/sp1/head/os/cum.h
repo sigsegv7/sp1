@@ -80,6 +80,18 @@ status_t cum_init_object(
 );
 
 /*
+ * Lookup a single object by name from a CUM directory
+ *
+ * @direc: Cum directory to lookup from
+ * @name:  Name to lookup
+ * @res:   Result is written here
+ */
+status_t cum_lookup_single(
+    struct cum_object *direc,
+    const char *name, struct cum_object **res
+);
+
+/*
  * Add an object to the CUM directory
  *
  * @direc:   CUM directory to add to
