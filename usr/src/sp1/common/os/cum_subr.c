@@ -71,3 +71,65 @@ cum_init_object(char *name, void *data, cum_domain_t dom, struct cum_object **re
     *res = cum;
     return STATUS_SUCCESS;
 }
+
+status_t
+cum_directory_add(struct cum_object *direc, struct cum_object *obj)
+{
+    struct cum_directory *direc_ent;
+    struct cum_object *obj_prev;
+
+    if (direc == NULL || obj == NULL) {
+        return STATUS_INVALID_PARAM;
+    }
+
+    if (direc->dom != CUM_OBJECT_DIRECTORY) {
+        return STATUS_NOT_DIRECTORY;
+    }
+
+    if ((direc_ent = direc->data) == NULL) {
+        return STATUS_IO_ERROR;
+    }
+
+    /* Append to this directory */
+    if ((obj_prev = direc_ent->last) == NULL) {
+        direc_ent->last = obj;
+        direc_ent->first = obj;
+    } else {
+        obj_prev->next = obj;
+        direc_ent->last = obj;
+    }
+
+    obj->next = NULL;
+    return STATUS_SUCCESS;
+}
+
+status_t
+cum_init_directory(char *name, struct cum_object **res)
+{
+    struct cum_object *direc;
+    struct cum_directory *direc_ent;
+    status_t status;
+
+    direc_ent = kalloc(sizeof(*direc_ent));
+    if (direc_ent == NULL) {
+        return STATUS_NO_MEMORY;
+    }
+
+    direc_ent->first = NULL;
+    direc_ent->last = NULL;
+
+    status = cum_init_object(
+        name,
+        direc_ent,
+        CUM_OBJECT_DIRECTORY,
+        &direc
+    );
+
+    if (status != STATUS_SUCCESS) {
+        kfree(direc_ent);
+        return status;
+    }
+
+    *res = direc;
+    return STATUS_SUCCESS;
+}

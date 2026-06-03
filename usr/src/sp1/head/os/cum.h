@@ -51,6 +51,17 @@ struct cum_object {
 };
 
 /*
+ * Represents a CUM directory
+ *
+ * @first: First entry in directory
+ * @last:  Last entry in diredctory
+ */
+struct cum_directory {
+    struct cum_object *first;
+    struct cum_object *last;
+};
+
+/*
  * CUM root object
  */
 extern struct cum_object *cum_root;
@@ -67,6 +78,22 @@ status_t cum_init_object(
     char *name, void *data,
     cum_domain_t dom, struct cum_object **res
 );
+
+/*
+ * Add an object to the CUM directory
+ *
+ * @direc:   CUM directory to add to
+ * @obj:     Object to add to cum directory
+ */
+status_t cum_directory_add(struct cum_object *direc, struct cum_object *obj);
+
+/*
+ * Initialize a CUM object as a directory
+ *
+ * @name: Name of directory to assign
+ * @res:  Result is written here
+ */
+status_t cum_init_directory(char *name, struct cum_object **res);
 
 /*
  * Initialize the CUM subsystem as a whole

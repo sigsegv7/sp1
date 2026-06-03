@@ -19,10 +19,8 @@ cum_init(void)
 {
     status_t status;
 
-    status = cum_init_object(
+    status = cum_init_directory(
         CUM_ROOT_NAME,
-        NULL,
-        CUM_OBJECT_DIRECTORY,
         &cum_root
     );
 
