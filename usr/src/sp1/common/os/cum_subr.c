@@ -40,7 +40,7 @@ cum_write_name(const char *name, struct cum_object *res)
         return STATUS_NO_MEMORY;
     }
 
-    memcpy(new_p, name, slen);
+    memcpy(new_p, name, slen + 1);
     res->name = new_p;
     return STATUS_SUCCESS;
 }
