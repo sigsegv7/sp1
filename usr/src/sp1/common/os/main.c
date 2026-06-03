@@ -13,6 +13,7 @@
 #include <io/acpi/acpi.h>
 #include <os/bpt.h>
 #include <os/knot.h>
+#include <os/cum.h>
 #include <lib/printf.h>
 #include <mu/cpu.h>
 #include <mm/physmem.h>
@@ -59,6 +60,9 @@ main(void)
 
     /* Initialize the main allocator */
     kalloc_init();
+
+    /* Initialize the CUM manager */
+    cum_init();
 
     /* Initialize virtual memory management */
     mm_vm_init();

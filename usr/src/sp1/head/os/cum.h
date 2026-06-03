@@ -18,6 +18,9 @@
 /* Maximum name length of a CUM object */
 #define CUM_NAME_MAXLEN 255
 
+/* Root CUM directory name */
+#define CUM_ROOT_NAME "root"
+
 /*
  * Valid CUM object / domain types
  *
@@ -48,6 +51,11 @@ struct cum_object {
 };
 
 /*
+ * CUM root object
+ */
+extern struct cum_object *cum_root;
+
+/*
  * Allocate a CUM object
  *
  * @name: Name of CUM object to allocate
@@ -59,5 +67,10 @@ status_t cum_init_object(
     char *name, void *data,
     cum_domain_t dom, struct cum_object **res
 );
+
+/*
+ * Initialize the CUM subsystem as a whole
+ */
+status_t cum_init(void);
 
 #endif  /* !_OS_CUM_H_ */
