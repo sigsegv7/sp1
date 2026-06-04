@@ -62,9 +62,30 @@ struct cum_directory {
 };
 
 /*
+ * Arguments for path resolution of a CUM
+ * object
+ *
+ * @lookup: Lookup result is stored here
+ * @path:   Path to resolve
+ * @flags:  Optional flags
+ */
+struct cum_resolve {
+    struct cum_object *lookup;
+    const char *path;
+    int flags;
+};
+
+/*
  * CUM root object
  */
 extern struct cum_object *cum_root;
+
+/*
+ * Resolve a CUM object by path
+ *
+ * @rp: CUM resoulution parameters
+ */
+status_t cum_resolve(struct cum_resolve *rp);
 
 /*
  * Allocate a CUM object
