@@ -18,6 +18,7 @@
 #include <io/pci/pcireg.h>
 #include <mu/pci.h>
 #include <mm/kalloc.h>
+#include <stdbool.h>
 #include <string.h>
 
 #define pr_trace(fmt, ...) \
@@ -118,6 +119,65 @@ pci_enumerate(void)
             pci_device_inspect(&dev);
         }
     }
+}
+
+/*
+ * Returns true if the device/vendor id matches the advertisement
+ * packet
+ */
+static inline bool
+pci_vd_match(struct pci_device *dev, struct pci_adv *adv)
+{
+    if (adv == NULL) {
+        return NULL;
+    }
+
+    if (dev->vendor_id == adv->vendor_id &&
+        dev->device_id == adv->device_id) {
+        return true;
+    }
+
+    return false;
+}
+
+/*
+ * Returns true if the class/subclass ID matches the advertisement
+ * packet
+ */
+static inline bool
+pci_sc_match(struct pci_device *dev, struct pci_adv *adv)
+{
+    if (adv == NULL) {
+        return NULL;
+    }
+
+    if (dev->class_id == adv->class_id &&
+        dev->subclass_id == adv->subclass_id) {
+        return true;
+    }
+
+    return false;
+}
+
+struct pci_device *
+pci_resolve_adv(struct pci_adv *adv)
+{
+    struct pci_device *dev;
+
+    TAILQ_FOREACH(dev, &dev_list, link) {
+        if (adv->ven_dev) {
+            if ((pci_vd_match(dev, adv)))
+                return dev;
+
+            continue;
+        }
+
+        if (pci_sc_match(dev, adv)) {
+            return dev;
+        }
+    }
+
+    return NULL;
 }
 
 void
