@@ -20,11 +20,15 @@
  * @function:  PCI function number
  * @device:    PCI device number
  * @bus:       PCI bus number
+ * @vendor_id: PCI vendor ID
+ * @device_id: PCI device ID
  */
 struct pci_device {
     uint8_t function : 3;
     uint8_t device   : 5;
     uint8_t bus;
+    uint16_t vendor_id;
+    uint16_t device_id;
 };
 
 #endif  /* !_PCI_DEVICE_H_ */
