@@ -86,9 +86,22 @@ hpet_register(struct clk_ticker *ticker)
     );
 }
 
+static size_t
+hpet_get_count(void)
+{
+    return hpet_mmio_read(HPET_MAIN_CNT);
+}
+
+static void
+hpet_set_count(size_t v)
+{
+   hpet_mmio_write(HPET_MAIN_CNT, v);
+}
+
 status_t
 md_hpet_init(void)
 {
+    struct ticker_ops *ops;
     struct clk_ticker ticker;
     struct acpi_hpet *hpet_desc;
     struct acpi_gas *gas;
@@ -139,6 +152,10 @@ md_hpet_init(void)
 
     memcpy(ticker.name, HPET_TICKER_NAME, sizeof(HPET_TICKER_NAME));
     ticker.period = clk_period;
+
+    ops = &ticker.ops;
+    ops->set_count = hpet_set_count;
+    ops->get_count = hpet_get_count;
     status = hpet_register(&ticker);
 
     if (status != STATUS_SUCCESS) {

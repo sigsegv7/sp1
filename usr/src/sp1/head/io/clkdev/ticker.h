@@ -12,6 +12,7 @@
 #ifndef _CLKDEV_TICKER_H_
 #define _CLKDEV_TICKER_H_ 1
 
+#include <sys/cdefs.h>
 #include <sys/types.h>
 #include <os/cum.h>
 
@@ -19,19 +20,71 @@
 #define TICKER_DATA_FROM(OBJ_P) \
     ((struct clk_ticker *)(OBJ_P)->data)
 
+struct clk_ticker;
 extern struct cum_object *clkdev_root;
+
+/*
+ * Operations that can be associated with a ticker
+ *
+ * @get_count: Obtain the current ticker value
+ * @set_count: Set the current ticker value
+ */
+struct ticker_ops {
+    size_t(*get_count)(void);
+    void(*set_count)(size_t cnt);
+};
 
 /*
  * Represents a ticker device i.e., a component that includes a
  * monotonic counter.
  *
- *
  * @name:   Name of ticker device
  * @period: Counter period (a value of 0 indicates unused)
+ * @ops:    Ticker operations
  */
 struct clk_ticker {
     char name[TICKER_NAMESZ];
     size_t period;
+    struct ticker_ops ops;
 };
+
+/*
+ * Obtain the current count from a ticker
+ *
+ * @ticker: Ticker to obtain count from
+ */
+__always_inline static inline size_t
+ticker_get_count(struct clk_ticker *ticker)
+{
+    struct ticker_ops *ops;
+
+    if (ticker == NULL) {
+        return 0;
+    }
+
+    ops = &ticker->ops;
+    return (ops->get_count == NULL) ? 0 : ops->get_count();
+}
+
+/*
+ * Set the current count for a ticker
+ *
+ * @ticker: Ticker to set for
+ * @v:      Value to set
+ */
+__always_inline static inline void
+ticker_set_count(struct clk_ticker *ticker, size_t v)
+{
+    struct ticker_ops *ops;
+
+    if (ticker == NULL) {
+        return;
+    }
+
+    ops = &ticker->ops;
+    if (ops->set_count != NULL) {
+        ops->set_count(v);
+    }
+}
 
 #endif  /* !_CLKDEV_TICKER_H_ */
