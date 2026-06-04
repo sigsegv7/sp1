@@ -13,5 +13,6 @@
 #define _SYS_LIMITS_H_ 1
 
 #define CHAR_BIT 8
+#define NAMESZ 255
 
 #endif  /* !_SYS_LIMITS_H_ */
