@@ -11,6 +11,7 @@
 
 #include <mu/board.h>
 #include <machine/hpet.h>
+#include <io/pci/pci.h>
 #include <io/clkdev/clkdev.h>
 #include <lib/printf.h>
 
@@ -22,6 +23,8 @@ mu_board_init(void)
 {
     pr_trace("begin board init\n");
     clkdev_init();
+
     md_hpet_init();
+    pci_init();
     return STATUS_SUCCESS;
 }
