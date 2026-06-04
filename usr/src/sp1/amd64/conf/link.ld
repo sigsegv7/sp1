@@ -36,6 +36,14 @@ SECTIONS
 
     . += CONSTANT(MAXPAGESIZE);
 
+    .driver : {
+        __driver_start = .;
+        KEEP(*(.driver .driver));
+        __driver_end = .;
+    }
+
+    . += CONSTANT(MAXPAGESIZE);
+
     .data : {
         *(.data)
     } :data

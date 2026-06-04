@@ -14,6 +14,7 @@
 #include <os/bpt.h>
 #include <os/knot.h>
 #include <os/cum.h>
+#include <os/driver.h>
 #include <lib/printf.h>
 #include <mu/cpu.h>
 #include <mm/physmem.h>
@@ -75,6 +76,9 @@ main(void)
 
     /* Post-init the processor */
     mu_cpu_postinit(&bsp);
+
+    /* Initialize system drivers */
+    DRIVERS_INIT();
 
     printf("[*] sp1 is pre-alpha\n");
     printf("[*] knotting kernel...\n");
