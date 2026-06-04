@@ -1,0 +1,54 @@
+.Dd Jun 4 2026
+.Dt TICKER 9
+.Os SP1
+.Sh NAME
+.Nm ticker - monotonic timer interface
+.Sh SYNOPSIS
+.In os/cum.h
+.In io/clkdev/ticker.h
+
+The ticker interface is apart of the clkdev class of devices and is to be accessible via
+/clkdev/ticker<n>, where 'n' is the instance number.
+
+.Sh DESCRIPTION
+
+The ticker interface provides various helpers which can be used for operations ranging from single-threaded
+delayed sleeps, tick counter setting, and tick counter getting. An example usage for sleeping 1000 ms per
+every operation is shown below:
+
+.nf
+.ft C
+
+struct cum_object *obj;
+struct cum_resolve resolve;
+struct clk_ticker *ticker;
+size_t start, delta;
+status_t s;
+
+/* Resolve the ticker object via CUM */
+resolve.lookup = NULL;
+resolve.path = "/clkdev/ticker0";
+resolve.flags = 0;
+s = cum_resolve(&resolve);
+
+if (s != STATUS_SUCCESS) {
+    knot("failed to locate ticker0\n");
+}
+
+ticker = TICKER_DATA_FROM(resolve.lookup);
+for (;;) {
+    start = ticker_get_count(ticker);
+    delta = start + ticker_msec_delta(ticker, 1000);
+
+    while (ticker_get_count(ticker) < delta) {
+        asm volatile("pause");
+    }
+
+    ...
+}
+
+.ft R
+.fi
+
+.Sh SEE ALSO
+.Xr cum 9
