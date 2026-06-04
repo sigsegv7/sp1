@@ -5,4 +5,5 @@ qemu-system-x86_64 \
     --enable-kvm   \
     -m 2G          \
     -monitor stdio \
-    -cpu host
+    -cpu host      \
+    -device qemu-xhci
