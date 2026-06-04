@@ -18,12 +18,14 @@
 /*
  * Descriptor of device present on PCI bus
  *
- * @function:  PCI function number
- * @device:    PCI device number
- * @bus:       PCI bus number
- * @vendor_id: PCI vendor ID
- * @device_id: PCI device ID
- * @link:      Queue link
+ * @function:       PCI function number
+ * @device:         PCI device number
+ * @bus:            PCI bus number
+ * @vendor_id:      PCI vendor ID
+ * @device_id:      PCI device ID
+ * @class_id:       PCI class ID
+ * @subclass_id:    PCI subclass ID
+ * @link:           Queue link
  */
 struct pci_device {
     uint8_t function : 3;
@@ -31,6 +33,8 @@ struct pci_device {
     uint8_t bus;
     uint16_t vendor_id;
     uint16_t device_id;
+    uint8_t class_id;
+    uint8_t subclass_id;
     TAILQ_ENTRY(pci_device) link;
 };
 

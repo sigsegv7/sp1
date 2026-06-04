@@ -32,17 +32,25 @@ static void
 pci_device_add(struct pci_device *dev)
 {
     struct pci_device *dev_cpy;
-    uint16_t vendor_id;
-    uint16_t device_id;
+    uint16_t vendor_id, device_id;
+    uint32_t classrev;
+    uint8_t class, subclass;
 
     vendor_id = cam.cam_readl(dev, PCIREG_VENDOR_ID) & 0xFFFF;
     device_id = cam.cam_readl(dev, PCIREG_DEVICE_ID) >> 16;
+    classrev = cam.cam_readl(dev, PCIREG_CLASSREV);
+
+    class = PCIREG_CLASS(classrev);
+    subclass = PCIREG_SUBCLASS(classrev);
 
     dev->vendor_id = vendor_id;
     dev->device_id = device_id;
-    pr_trace("detected %x:%x\n", device_id, vendor_id);
+    dev->class_id = class;
+    dev->subclass_id = subclass;
 
+    pr_trace("detected %04x:%04x\n", device_id, vendor_id);
     dev_cpy = kalloc(sizeof(*dev_cpy));
+
     if (dev_cpy == NULL) {
         return;
     }
