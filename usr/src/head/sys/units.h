@@ -16,4 +16,7 @@
 #define UNIT_GIB 0x40000000
 #define UNIT_MIB 0x100000
 
+/* Time units */
+#define UNIT_FS_PER_MS 1000000000000ULL
+
 #endif  /* !_SYS_UNITS_H_ */
