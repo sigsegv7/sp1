@@ -152,6 +152,7 @@ md_hpet_init(void)
 
     memcpy(ticker.name, HPET_TICKER_NAME, sizeof(HPET_TICKER_NAME));
     ticker.period = clk_period;
+    ticker.unit = CLK_UNIT_FS;
 
     ops = &ticker.ops;
     ops->set_count = hpet_set_count;

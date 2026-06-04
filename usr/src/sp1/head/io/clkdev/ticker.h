@@ -12,9 +12,11 @@
 #ifndef _CLKDEV_TICKER_H_
 #define _CLKDEV_TICKER_H_ 1
 
+#include <sys/units.h>
 #include <sys/cdefs.h>
 #include <sys/types.h>
 #include <os/cum.h>
+#include <os/knot.h>
 
 #define TICKER_NAMESZ 32
 #define TICKER_DATA_FROM(OBJ_P) \
@@ -22,6 +24,17 @@
 
 struct clk_ticker;
 extern struct cum_object *clkdev_root;
+
+/*
+ * Units used by clkdev
+ *
+ * @CLK_UNIT_NONE:   Units is unset
+ * @CLK_UNIT_FS:     Units is femtoseconds
+ */
+typedef enum {
+    CLK_UNIT_NONE,
+    CLK_UNIT_FS,
+} clk_unit_t;
 
 /*
  * Operations that can be associated with a ticker
@@ -40,13 +53,37 @@ struct ticker_ops {
  *
  * @name:   Name of ticker device
  * @period: Counter period (a value of 0 indicates unused)
+ * @unit:   Units used
  * @ops:    Ticker operations
  */
 struct clk_ticker {
     char name[TICKER_NAMESZ];
     size_t period;
+    clk_unit_t unit;
     struct ticker_ops ops;
 };
+
+/*
+ * Convert a number of msecs to a ticker delta
+ *
+ * @ticker: Ticker to compute from
+ * @msec:   Number of miliseconds to offset
+ */
+__always_inline static inline size_t
+ticker_msec_delta(struct clk_ticker *ticker, size_t msec)
+{
+    if (ticker == NULL) {
+        return 0;
+    }
+
+    switch (ticker->unit) {
+    case CLK_UNIT_FS:
+        return (msec * UNIT_FS_PER_MS) / ticker->period;
+    default:
+        knot("ticker: bad ticker unit in %s()\n", __func__);
+        break;
+    }
+}
 
 /*
  * Obtain the current count from a ticker
