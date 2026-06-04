@@ -15,6 +15,8 @@
 #include <sys/status.h>
 #include <mu/cpu.h>
 
+#define LAPIC_TIMER_INTVEC 0x81
+
 /*
  * Initialize the Local APIC
  */

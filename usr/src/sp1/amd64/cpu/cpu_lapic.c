@@ -15,8 +15,11 @@
 #include <machine/lapic.h>
 #include <machine/lapicreg.h>
 #include <machine/cpuid.h>
+#include <machine/idt.h>
 #include <machine/msr.h>
 #include <os/knot.h>
+#include <os/cum.h>
+#include <io/clkdev/ticker.h>
 #include <mu/mmio.h>
 #include <lib/printf.h>
 #include <mm/vm.h>
@@ -37,6 +40,8 @@
             printf("lapic: " fmt, ##__VA_ARGS__);   \
         }                                           \
     } while (0);
+
+extern void lapic_tmr_isr(void *sf);
 
 /*
  * Returns true if the processor contains a Local APIC
@@ -160,6 +165,124 @@ lapic_enable(struct mcb *mcb)
     bsp_trace("max_lvt : %d, type : %s\n", max_lvt, type);
 }
 
+/*
+ * Put the Local APIC timer in a disabled state
+ */
+static void
+lapic_timer_stop(struct mcb *mcb)
+{
+    lapic_write(mcb, LAPIC_LVT_TMR, LAPIC_LVT_MASK);
+    lapic_write(mcb, LAPIC_INIT_CNT, 0);
+}
+
+/*
+ * Calibrate the Local APIC timer
+ */
+static size_t
+lapic_timer_init(struct mcb *mcb)
+{
+    const uint16_t MAX_SAMPLES = 0xFFFF;
+    struct cum_resolve resolve;
+    struct cum_object *tmr_obj;
+    struct clk_ticker *ticker;
+    status_t status;
+    size_t ticks_start, ticks_end;
+    size_t ticks_total, freq, unit;
+    size_t ref_freq;
+
+    if (mcb == NULL) {
+        return 0;
+    }
+
+    resolve.lookup = NULL;
+    resolve.path = "/clkdev/ticker0";
+    resolve.flags = 0;
+    status = cum_resolve(&resolve);
+
+    if (status != STATUS_SUCCESS) {
+        knot("lapic: could not resolve ticker0\n");
+    }
+
+    ticker = TICKER_DATA_FROM(resolve.lookup);
+    lapic_timer_stop(mcb);
+
+    bsp_trace("calibrating per-core timers...\n");
+    ticks_start = ticker_get_count(ticker);
+    lapic_write(mcb, LAPIC_INIT_CNT, MAX_SAMPLES);
+
+    while (lapic_read(mcb, LAPIC_CUR_CNT) != 0);
+
+    ticks_end = ticker_get_count(ticker);
+    ticks_total = ticks_end - ticks_start;
+
+    unit = ticker_unit(ticker);
+    ref_freq = 1000000000000000ULL / ticker->period;
+    freq = (MAX_SAMPLES * ref_freq) / ticks_total;
+
+    mcb->lapic_tmr_freq = freq;
+    return freq;
+}
+
+/*
+ * Starts the Local APIC countdown timer...
+ *
+ * @mcb:  Machine core block
+ * @mask: True to mask timer.
+ * @mode: Timer mode.
+ * @count: Count to start at.
+ */
+static inline void
+lapic_timer_start(struct mcb *mcb, bool mask, uint8_t mode, uint32_t count)
+{
+    uint32_t tmp;
+
+    if (mcb == NULL) {
+        return;
+    }
+
+    tmp = (mode << 17) | (mask << 16) | LAPIC_TIMER_INTVEC;
+    lapic_write(mcb, LAPIC_LVT_TMR, tmp);
+    lapic_write(mcb, LAPIC_DCR, 0);
+    lapic_write(mcb, LAPIC_INIT_CNT, count);
+}
+
+/*
+ * Start Local APIC timer oneshot with number
+ * of ticks to count down from.
+ *
+ * @mcb:  Machine core block
+ * @mask: If `true', timer will be masked, `count' should be 0.
+ * @count: Number of ticks.
+ */
+static void
+lapic_timer_oneshot(struct mcb *mcb, bool mask, uint32_t count)
+{
+    if (mcb == NULL) {
+        return;
+    }
+
+    lapic_timer_start(mcb, mask, LVT_TMR_ONESHOT, count);
+}
+
+/*
+ * Start Local APIC timer oneshot in microseconds.
+ *
+ * @mcb: Machine core block
+ * @us: Microseconds.
+ */
+static void
+lapic_timer_oneshot_us(struct mcb *mcb, size_t usec)
+{
+    uint64_t ticks;
+
+    if (mcb == NULL) {
+        return;
+    }
+
+    ticks = usec * (mcb->lapic_tmr_freq / 1000000);
+    lapic_timer_oneshot(mcb, false, ticks);
+}
+
 status_t
 md_lapic_init(struct cpu_info *ci)
 {
@@ -178,5 +301,14 @@ md_lapic_init(struct cpu_info *ci)
     mcb = &ci->mcb;
     mcb->x2apic_enabled = x2apic_is_present();
     lapic_enable(mcb);
+
+    md_idt_set_gate(
+        LAPIC_TIMER_INTVEC,
+        (uintptr_t)lapic_tmr_isr,
+        IDT_INT_GATE,
+        0
+    );
+
+    lapic_timer_init(mcb);
     return STATUS_SUCCESS;
 }

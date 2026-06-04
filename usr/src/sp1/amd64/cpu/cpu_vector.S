@@ -242,3 +242,9 @@ page_fault:
     hlt
     jmp 1b
     hlt
+
+    .globl lapic_tmr_isr
+lapic_tmr_isr:
+    ud2
+    cli
+    hlt

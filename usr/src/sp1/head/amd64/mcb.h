@@ -22,12 +22,14 @@
  * @family_id:      Processor family ID
  * @lapic_mmio:     xAPIC MMIO base
  * @x2apic_enabled: If set, x2APIC is enabled
+ * @lapic_tmr_freq: LAPIC timer frequency
  */
 struct mcb {
     uint8_t model_id;
     uint16_t family_id : 12;
     void *lapic_mmio;
     uint8_t x2apic_enabled : 1;
+    size_t lapic_tmr_freq;
 };
 
 #endif  /* !_MACHINE_MCB_H_ */
