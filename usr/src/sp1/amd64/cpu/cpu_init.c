@@ -14,6 +14,7 @@
 #include <machine/cpuid.h>
 #include <machine/idt.h>
 #include <machine/lapic.h>
+#include <machine/msr.h>
 #include <stdbool.h>
 
 #define pr_trace(fmt, ...) \
@@ -132,6 +133,15 @@ mu_cpu_preinit(struct cpu_info *ci)
 
     /* Load the IDT */
     md_idt_load();
+
+    /* Set current processor */
+    md_wrmsr(IA32_GS_BASE, (uintptr_t)ci);
+}
+
+struct cpu_info *
+mu_this_cpu(void)
+{
+    return (struct cpu_info *)md_rdmsr(IA32_GS_BASE);
 }
 
 void

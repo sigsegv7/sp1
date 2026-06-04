@@ -34,6 +34,11 @@ struct cpu_info {
 };
 
 /*
+ * Obtain the current processor core
+ */
+struct cpu_info *mu_this_cpu(void);
+
+/*
  * Routine used early on to initialize critical processor
  * features and gather information about the processor so
  * that your machine is OwOing smoothly.

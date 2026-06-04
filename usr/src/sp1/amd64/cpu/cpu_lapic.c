@@ -21,6 +21,7 @@
 #include <os/cum.h>
 #include <io/clkdev/ticker.h>
 #include <mu/mmio.h>
+#include <mu/cpu.h>
 #include <lib/printf.h>
 #include <mm/vm.h>
 #include <stdbool.h>
