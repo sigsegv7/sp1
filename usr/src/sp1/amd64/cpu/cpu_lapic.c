@@ -52,6 +52,18 @@ lapic_is_present(void)
 }
 
 /*
+ * Returns true if the Local APIC supports x2APIC mode
+ */
+static inline bool
+x2apic_is_present(void)
+{
+    uint32_t ecx, unused;
+
+    __cpuid(0x01, unused, unused, ecx, unused);
+    return ISSET(ecx, BIT(21)) != 0;
+}
+
+/*
  * Read a value from the Local APIC register space
  *
  * @mcb:  Machine core block
@@ -71,7 +83,8 @@ lapic_read(struct mcb *mcb, uint16_t reg)
         reg_base = PTR_OFFSET(mcb->lapic_mmio, reg);
         v = mmio_read32(reg_base);
     } else {
-        knot("x2apic is currently unimplemented\n");
+        reg >>= 4;
+        v = md_rdmsr(x2APIC_MSR_BASE + reg);
     }
 
     return v;
@@ -84,23 +97,22 @@ lapic_read(struct mcb *mcb, uint16_t reg)
  * @reg:  Register to read
  * @v:    Value to write
  */
-static uint64_t
+static void
 lapic_write(struct mcb *mcb, uint16_t reg, uint64_t v)
 {
     uint32_t *reg_base;
 
     if (mcb == NULL) {
-        return 0;
+        return;
     }
 
     if (!mcb->x2apic_enabled) {
         reg_base = PTR_OFFSET(mcb->lapic_mmio, reg);
         mmio_write32(reg_base, v);
     } else {
-        knot("x2apic is currently unimplemented\n");
+        reg >>= 4;
+        md_wrmsr(x2APIC_MSR_BASE + reg, v);
     }
-
-    return v;
 }
 
 /*
@@ -125,6 +137,7 @@ lapic_enable(struct mcb *mcb)
 
     /* Hardware enable the chip */
     apic_base |= LAPIC_HW_ENABLE;
+    apic_base |= mcb->x2apic_enabled << x2APIC_ENABLE_SHIFT;
     md_wrmsr(IA32_APIC_BASE_MSR, apic_base);
 
     /* Software enable the chip */
@@ -163,6 +176,7 @@ md_lapic_init(struct cpu_info *ci)
     }
 
     mcb = &ci->mcb;
+    mcb->x2apic_enabled = x2apic_is_present();
     lapic_enable(mcb);
     return STATUS_SUCCESS;
 }
