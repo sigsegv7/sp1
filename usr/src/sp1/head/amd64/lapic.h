@@ -22,4 +22,9 @@
  */
 status_t md_lapic_init(struct cpu_info *ci);
 
+/*
+ * Prepare the Local APIC timer oneshot mode
+ */
+void md_lapic_tmr_set(void);
+
 #endif  /* !_MACHINE_LAPIC_H_ */

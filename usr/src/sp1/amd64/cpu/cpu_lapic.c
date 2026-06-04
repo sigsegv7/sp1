@@ -284,6 +284,20 @@ lapic_timer_oneshot_us(struct mcb *mcb, size_t usec)
     lapic_timer_oneshot(mcb, false, ticks);
 }
 
+void
+md_lapic_tmr_set(void)
+{
+    struct cpu_info *ci;
+
+    if ((ci = mu_this_cpu()) == NULL) {
+        return;
+    }
+
+    lapic_write(&ci->mcb, LAPIC_EOI, 0x00);
+    lapic_timer_oneshot_us(&ci->mcb, 900000);
+    lapic_write(&ci->mcb, LAPIC_EOI, 0);
+}
+
 status_t
 md_lapic_init(struct cpu_info *ci)
 {
