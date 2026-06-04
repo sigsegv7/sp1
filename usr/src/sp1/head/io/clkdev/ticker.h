@@ -64,6 +64,27 @@ struct clk_ticker {
 };
 
 /*
+ * Obtain the base unit for a specific ticker
+ *
+ * @ticker: Ticker to obtain base unit from
+ */
+__always_inline static inline size_t
+ticker_unit(struct clk_ticker *ticker)
+{
+    if (ticker == NULL) {
+        return 0;
+    }
+
+    switch (ticker->unit) {
+    case CLK_UNIT_FS:
+        return UNIT_FS_PER_MS;
+    default:
+        knot("ticker: bad ticker unit in %s()\n", __func__);
+        break;
+    }
+}
+
+/*
  * Convert a number of msecs to a ticker delta
  *
  * @ticker: Ticker to compute from
@@ -72,17 +93,14 @@ struct clk_ticker {
 __always_inline static inline size_t
 ticker_msec_delta(struct clk_ticker *ticker, size_t msec)
 {
+    size_t unit;
+
     if (ticker == NULL) {
         return 0;
     }
 
-    switch (ticker->unit) {
-    case CLK_UNIT_FS:
-        return (msec * UNIT_FS_PER_MS) / ticker->period;
-    default:
-        knot("ticker: bad ticker unit in %s()\n", __func__);
-        break;
-    }
+    unit = ticker_unit(ticker);
+    return (msec * unit) / ticker->period;
 }
 
 /*
