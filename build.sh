@@ -12,5 +12,6 @@
 
 MAKE=make
 
-cd usr/src/;    \
+pushd usr/src/;    \
     $MAKE
+popd
