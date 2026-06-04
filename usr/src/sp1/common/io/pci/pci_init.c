@@ -126,5 +126,5 @@ pci_init(void)
     TAILQ_INIT(&dev_list);
 
     pci_enumerate();
-    pr_trace("detected %d device(s)\n", dev_count);
+    pr_trace("detected %d device(s) inserted deep~\n", dev_count);
 }
