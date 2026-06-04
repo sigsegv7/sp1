@@ -11,6 +11,7 @@
 
 #include <mu/board.h>
 #include <machine/hpet.h>
+#include <io/clkdev/clkdev.h>
 #include <lib/printf.h>
 
 #define pr_trace(fmt, ...) \
@@ -20,6 +21,7 @@ status_t
 mu_board_init(void)
 {
     pr_trace("begin board init\n");
+    clkdev_init();
     md_hpet_init();
     return STATUS_SUCCESS;
 }

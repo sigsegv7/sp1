@@ -4,21 +4,19 @@
  *
  * The following sources are CONFIDENTIAL and PROPRIETARY
  * property of Mirocom Laboratories. Unauthorized copying,
- * use, distrubution or modification of this file, in whole
+ * use, distribution or modification of this file, in whole
  * and in part, is strictly prohibited without the prior written
  * consent from Mirocom Laboratories.
  */
 
-#ifndef _MACHINE_HPET_H_
-#define _MACHINE_HPET_H_ 1
+#ifndef _CLKDEV_CLKDEV_H_
+#define _CLKDEV_CLKDEV_H_ 1
 
 #include <sys/status.h>
 
-#define HPET_TICKER_NAME "HIGH_PRECISION_EVENT_TIMER"
-
 /*
- * Initialize the on-board HPET timers
+ * Initialize the clock device manager
  */
-status_t md_hpet_init(void);
+status_t clkdev_init(void);
 
-#endif  /* !_MACHINE_HPET_H_ */
+#endif  /* !_CLKDEV_CLKDEV_H_ */

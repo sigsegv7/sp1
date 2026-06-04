@@ -13,13 +13,17 @@
 #include <sys/param.h>
 #include <sys/cdefs.h>
 #include <os/knot.h>
+#include <os/cum.h>
 #include <mu/mmio.h>
+#include <io/clkdev/ticker.h>
 #include <io/acpi/tables.h>
 #include <io/acpi/acpi.h>
 #include <machine/hpet.h>
 #include <machine/hpetreg.h>
 #include <mm/vm.h>
+#include <mm/kalloc.h>
 #include <lib/printf.h>
+#include <string.h>
 
 #define pr_trace(fmt, ...) \
     printf("hpet: " fmt, ##__VA_ARGS__)
@@ -56,14 +60,42 @@ hpet_mmio_write(uint16_t offset, uint64_t v)
     mmio_write64(base, v);
 }
 
+static status_t
+hpet_register(struct clk_ticker *ticker)
+{
+    struct clk_ticker *data;
+    struct cum_object *cum_obj;
+    status_t status;
+
+    data = kalloc(sizeof(*data));
+    if (data == NULL) {
+        return STATUS_NO_MEMORY;
+    }
+
+    memcpy(data, ticker, sizeof(*data));
+    status = cum_init_object(
+        "ticker0",
+        data,
+        CUM_OBJECT_TIMER,
+        &cum_obj
+    );
+
+    return cum_directory_add(
+        clkdev_root,
+        cum_obj
+    );
+}
+
 status_t
 md_hpet_init(void)
 {
+    struct clk_ticker ticker;
     struct acpi_hpet *hpet_desc;
     struct acpi_gas *gas;
     uint64_t gen_cap, gen_conf;
     uint32_t clk_period;
     uint8_t rev_id, tmr_cnt;
+    status_t status;
 
     if ((hpet_desc = acpi_query("HPET")) == NULL) {
         knot("no presense of HPET detected");
@@ -104,6 +136,14 @@ md_hpet_init(void)
     gen_conf = hpet_mmio_read(HPET_GENERAL_CONF);
     gen_conf |= HPET_GCONF_EN;
     hpet_mmio_write(HPET_GENERAL_CONF, gen_conf);
+
+    memcpy(ticker.name, HPET_TICKER_NAME, sizeof(HPET_TICKER_NAME));
+    ticker.period = clk_period;
+    status = hpet_register(&ticker);
+
+    if (status != STATUS_SUCCESS) {
+        return status;
+    }
 
     return STATUS_SUCCESS;
 }
