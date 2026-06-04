@@ -17,21 +17,21 @@
 #include <io/pci/device.h>
 #include <io/pci/pcireg.h>
 #include <mu/pci.h>
+#include <mm/kalloc.h>
+#include <string.h>
 
 #define pr_trace(fmt, ...) \
     printf("pci: " fmt, ##__VA_ARGS__)
 
 /* Globals */
 static struct pci_cam_hook cam;
+static TAILQ_HEAD(, pci_device) dev_list;
+static size_t dev_count = 0;
 
-/*
- * Add a device to the PCI device list
- *
- * TODO: Finish this
- */
 static void
 pci_device_add(struct pci_device *dev)
 {
+    struct pci_device *dev_cpy;
     uint16_t vendor_id;
     uint16_t device_id;
 
@@ -41,6 +41,15 @@ pci_device_add(struct pci_device *dev)
     dev->vendor_id = vendor_id;
     dev->device_id = device_id;
     pr_trace("detected %x:%x\n", device_id, vendor_id);
+
+    dev_cpy = kalloc(sizeof(*dev_cpy));
+    if (dev_cpy == NULL) {
+        return;
+    }
+
+    memcpy(dev_cpy, dev, sizeof(*dev_cpy));
+    TAILQ_INSERT_TAIL(&dev_list, dev_cpy, link);
+    ++dev_count;
 }
 
 /*
@@ -114,5 +123,8 @@ pci_init(void)
     }
 
     pr_trace("initialized cam\n");
+    TAILQ_INIT(&dev_list);
+
     pci_enumerate();
+    pr_trace("detected %d device(s)\n", dev_count);
 }

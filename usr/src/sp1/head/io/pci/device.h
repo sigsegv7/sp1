@@ -13,6 +13,7 @@
 #define _PCI_DEVICE_H_ 1
 
 #include <sys/types.h>
+#include <sys/queue.h>
 
 /*
  * Descriptor of device present on PCI bus
@@ -22,6 +23,7 @@
  * @bus:       PCI bus number
  * @vendor_id: PCI vendor ID
  * @device_id: PCI device ID
+ * @link:      Queue link
  */
 struct pci_device {
     uint8_t function : 3;
@@ -29,6 +31,7 @@ struct pci_device {
     uint8_t bus;
     uint16_t vendor_id;
     uint16_t device_id;
+    TAILQ_ENTRY(pci_device) link;
 };
 
 #endif  /* !_PCI_DEVICE_H_ */
