@@ -56,7 +56,6 @@ hpet_mmio_write(uint16_t offset, uint64_t v)
     mmio_write64(base, v);
 }
 
-
 status_t
 md_hpet_init(void)
 {
