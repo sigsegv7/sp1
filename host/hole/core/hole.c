@@ -314,6 +314,8 @@ main(int argc, char **argv)
                 printf("fatal: out of memory\n");
                 return -1;
             }
+
+            break;
         case 'o':
             output_override = true;
             output_path = strdup(optarg);
