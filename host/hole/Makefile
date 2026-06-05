@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Copyright (c) 2026, Mirocom Laboratories
 # All rights reserved.
@@ -10,12 +9,20 @@
 # consent from Mirocom Laboratories.
 #
 
-MAKE=make
+CC = gcc
+CFILES = $(shell find . -name "*.c")
+OFILES = $(CFILES:.c=.o)
 
-pushd host/;       \
-    $MAKE
-popd
+CFLAGS =		\
+	-Wall		\
+	-pedantic
 
-pushd usr/src/;    \
-    $MAKE
-popd
+.PHONY: all
+all: ../bin/hole
+
+.PHONY: hole
+../bin/hole: $(OFILES)
+	$(CC) $^ -o $@
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@

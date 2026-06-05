@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Copyright (c) 2026, Mirocom Laboratories
 # All rights reserved.
@@ -10,12 +9,13 @@
 # consent from Mirocom Laboratories.
 #
 
-MAKE=make
+.PHONY: all
+all: bin hole
 
-pushd host/;       \
-    $MAKE
-popd
+.PHONY: bin
+bin:
+	mkdir -p $@
 
-pushd usr/src/;    \
-    $MAKE
-popd
+.PHONY: hole
+hole:
+	cd hole/; $(MAKE)
