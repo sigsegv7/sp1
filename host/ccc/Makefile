@@ -10,16 +10,8 @@
 #
 
 .PHONY: all
-all: bin hole ccc
+all: cumc
 
-.PHONY: bin
-bin:
-	mkdir -p $@
-
-.PHONY: ccc
-ccc:
-	cd ccc/; $(MAKE)
-
-.PHONY: hole
-hole:
-	cd hole/; $(MAKE)
+.PHONY: cumc
+cumc:
+	cd cumc/; $(MAKE)
