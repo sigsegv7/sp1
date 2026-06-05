@@ -18,10 +18,14 @@
 /*
  * Represents a xHCI host controller
  *
+ * @caps:      Host controller capability registers
+ * @oper:      Host controller operational registers
  * @max_slots: Maximum device slots
  * @max_ports: Maximum addressable ports
  */
 struct xhci_hc {
+    struct xhci_caps *caps;
+    struct xhci_opregs *oper;
     uint8_t max_slots;
     uint8_t max_ports;
 };

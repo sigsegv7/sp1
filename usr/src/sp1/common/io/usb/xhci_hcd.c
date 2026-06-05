@@ -16,6 +16,7 @@
 #include <io/usb/xhcireg.h>
 #include <io/usb/xhcivar.h>
 #include <os/driver.h>
+#include <mu/mmio.h>
 #include <lib/printf.h>
 #include <stdbool.h>
 
@@ -33,24 +34,106 @@ static struct driver_desc driver_desc;
 static struct xhci_hc hc;
 
 /*
+ * Halt a host controller
+ *
+ * @hc: Host controller to halt
+ *
+ * TODO: Implemenet better polling
+ */
+static status_t
+xhci_hc_halt(struct xhci_hc *hc)
+{
+    struct xhci_opregs *opregs;
+    uint32_t usbcmd, usbsts;
+
+    if (hc == NULL) {
+        return STATUS_INVALID_PARAM;
+    }
+
+    /* Request the host controller to halt */
+    opregs = hc->oper;
+    usbcmd = mmio_read32(&opregs->usbcmd);
+    usbcmd &= ~USBCMD_RUN;
+    mmio_write32(&opregs->usbcmd, usbcmd);
+
+    /* Wait for the host controller to halt */
+    usbsts = mmio_read32(&opregs->usbsts);
+    while (!ISSET(usbsts, USBSTS_HCH)) {
+        usbsts = mmio_read32(&opregs->usbsts);
+    }
+
+    return STATUS_SUCCESS;
+}
+
+/*
+ * Reset the host controller
+ *
+ * @hc: Host controller to reset
+ *
+ * TODO: Implement better polling
+ */
+static status_t
+xhci_hc_reset(struct xhci_hc *hc)
+{
+    struct xhci_opregs *opregs;
+    uint32_t usbcmd;
+
+    if (hc == NULL) {
+        return STATUS_INVALID_PARAM;
+    }
+
+    opregs = hc->oper;
+    usbcmd = mmio_read32(&opregs->usbcmd);
+    usbcmd |= USBCMD_HCRST;
+    mmio_write32(&opregs->usbcmd, usbcmd);
+
+    /* Wait for the reset to finish */
+    while (ISSET(usbcmd, USBCMD_HCRST)) {
+        usbcmd = mmio_read32(&opregs->usbcmd);
+    }
+
+    return STATUS_SUCCESS;
+}
+
+/*
  * Initialize the xHCI host controller
  */
 static status_t
 xhci_hc_init(void *mmio_base)
 {
     struct xhci_caps *cap_regs;
+    struct xhci_opregs *oper_regs;
+    status_t status;
 
     if (mmio_base == NULL) {
         return STATUS_INVALID_PARAM;
     }
 
     cap_regs = mmio_base;
+    oper_regs = PTR_OFFSET(cap_regs, cap_regs->caplength);
+
     hc.max_slots = XHCI_MAXSLOTS(cap_regs->hcsparams1);
     hc.max_ports = XHCI_MAXPORTS(cap_regs->hcsparams1);
+    hc.caps = cap_regs;
+    hc.oper = oper_regs;
 
     /* Some informational logging */
     pr_trace("hc.maxports : %d, hc.maxslots : %d\n",
         hc.max_ports, hc.max_slots);
+
+    /* Halt the host controller before we reset */
+    status = xhci_hc_halt(&hc);
+    if (status != STATUS_SUCCESS) {
+        pr_trace("error: failed to halt host controller\n");
+        return status;
+    }
+
+    /* Now we can reset it */
+    status = xhci_hc_reset(&hc);
+    if (status != STATUS_SUCCESS) {
+        pr_trace("error: failed to reset host controller\n");
+        return status;
+    }
 
     return STATUS_SUCCESS;
 }
