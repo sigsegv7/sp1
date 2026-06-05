@@ -15,18 +15,18 @@
 #include <sys/cdefs.h>
 
 /* Builds mmio_write<n> functions */
-#define _MMIO_WRITE_BUILDER(NAME, TYPE)     \
-    static inline void                      \
-    mmio_##NAME(TYPE *ptr, TYPE val)        \
-    {                                       \
-        __barrier();                        \
-        *(volatile TYPE *)ptr = val;        \
+#define _MMIO_WRITE_BUILDER(NAME, TYPE)         \
+    static inline void                          \
+    mmio_##NAME(volatile TYPE *ptr, TYPE val)   \
+    {                                           \
+        __barrier();                            \
+        *(volatile TYPE *)ptr = val;            \
     }
 
 /* Builds mmio_read<n> functions */
 #define _MMIO_READ_BUILDER(NAME, TYPE)      \
     static inline TYPE                      \
-    mmio_##NAME(TYPE *ptr)                  \
+    mmio_##NAME(volatile TYPE *ptr)         \
     {                                       \
         __barrier();                        \
         return *(volatile TYPE *)ptr;       \
