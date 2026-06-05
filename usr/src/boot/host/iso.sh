@@ -16,8 +16,12 @@ ISO=../../../sp1.iso
 CONFIG=../data/boot/limine.conf
 WALLPAPER=../data/boot/wallpaper.jpg
 KERNEL=../../../sp1.sys
+HOLE=../../../host/bin/hole
 
 mkdir -p iso_root/boot/
+
+# Create the initial ramdisk
+$HOLE -f ../data -o iso_root/boot/initrd.hole
 
 # Copy the kernel to the ISO root
 cp $KERNEL iso_root/boot
