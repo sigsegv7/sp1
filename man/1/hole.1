@@ -1,0 +1,26 @@
+.Dd Jun 4 2026
+.Dt HOLE 1
+.Os SP1
+.Sh NAME
+.Nm hole - initrd bundler
+.Sh SYNOPSIS
+
+hole [-fho] <optional output>
+
+.Sh DESCRIPTION
+
+The hole command is an initrd bundler that reads an input directory, constructs an offset table
+and writes the blob.
+
+The
+.Ft -f
+flag fills the "hole" (blob) with data when provided with an existing file path.
+
+The
+.Ft -h
+flag displays the help menu describing valid flags.
+
+The
+.Ft -o
+flag allows the invoker to specify an output path of the image
+blob file to be created.
