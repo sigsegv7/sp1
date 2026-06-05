@@ -13,6 +13,8 @@
 #include <sys/param.h>
 #include <io/pci/pci.h>
 #include <io/pci/device.h>
+#include <io/usb/xhcireg.h>
+#include <io/usb/xhcivar.h>
 #include <os/driver.h>
 #include <lib/printf.h>
 #include <stdbool.h>
@@ -26,6 +28,32 @@
 /* Forward declarations */
 static struct pci_driver self_pci;
 static struct driver_desc driver_desc;
+
+/* Globals */
+static struct xhci_hc hc;
+
+/*
+ * Initialize the xHCI host controller
+ */
+static status_t
+xhci_hc_init(void *mmio_base)
+{
+    struct xhci_caps *cap_regs;
+
+    if (mmio_base == NULL) {
+        return STATUS_INVALID_PARAM;
+    }
+
+    cap_regs = mmio_base;
+    hc.max_slots = XHCI_MAXSLOTS(cap_regs->hcsparams1);
+    hc.max_ports = XHCI_MAXPORTS(cap_regs->hcsparams1);
+
+    /* Some informational logging */
+    pr_trace("hc.maxports : %d, hc.maxslots : %d\n",
+        hc.max_ports, hc.max_slots);
+
+    return STATUS_SUCCESS;
+}
 
 static status_t
 xhci_driver_init(struct driver_desc *desc)
@@ -48,6 +76,7 @@ static status_t
 xhci_driver_kick(struct pci_device *dev)
 {
     static bool once = false;
+    void *mmio_space;
 
     if (dev == NULL) {
         return STATUS_INVALID_PARAM;
@@ -58,9 +87,17 @@ xhci_driver_kick(struct pci_device *dev)
         return STATUS_SUCCESS;
     }
 
-    pr_trace("attached %04x:%04x\n", dev->device_id, dev->vendor_id);
     once = true;
-    return STATUS_SUCCESS;
+    pr_trace("attached %04x:%04x\n", dev->device_id, dev->vendor_id);
+    mmio_space = pci_resolve_bar(dev, 0);
+
+    /* Verify the MMIO space */
+    if (mmio_space == NULL) {
+        pr_trace("error: failed to resolve BAR\n");
+        return STATUS_NO_DEV;
+    }
+
+    return xhci_hc_init(mmio_space);
 }
 
 /* Advertisement table */
