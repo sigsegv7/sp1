@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <stdbool.h>
 
 #define FILE_ALIGN 512
 #define ALIGN_UP(value, align)        (((value) + (align)-1) & ~((align)-1))
@@ -58,7 +59,8 @@ struct hole_ref {
 };
 
 /* Globals */
-static const char *output_path = "out.hole";
+static bool output_override = false;
+static char *output_path = "out.hole";
 static char *fill_dirpath = NULL;
 static size_t file_count = 0;
 static TAILQ_HEAD(, hole_ref) hole_files;
@@ -72,6 +74,7 @@ help(void)
     printf("usage: ./hole [flags]\n");
     printf("[-h]    Display this help menu\n");
     printf("[-f]    Fill hole with directory\n");
+    printf("[-o]    Output blob path\n");
 }
 
 /*
@@ -270,7 +273,7 @@ main(int argc, char **argv)
         return -1;
     }
 
-    while ((opt = getopt(argc, argv, "hf:")) != -1) {
+    while ((opt = getopt(argc, argv, "hf:o:")) != -1) {
         switch (opt) {
         case 'h':
             help();
@@ -278,6 +281,13 @@ main(int argc, char **argv)
         case 'f':
             fill_dirpath = strdup(optarg);
             if (fill_dirpath == NULL) {
+                printf("fatal: out of memory\n");
+                return -1;
+            }
+        case 'o':
+            output_override = true;
+            output_path = strdup(optarg);
+            if (output_path == NULL) {
                 printf("fatal: out of memory\n");
                 return -1;
             }
@@ -299,5 +309,10 @@ main(int argc, char **argv)
 
     hole_files_destroy();
     free(fill_dirpath);
+
+    if (output_override) {
+        free(output_path);
+    }
+
     return 0;
 }
