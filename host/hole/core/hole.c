@@ -46,6 +46,7 @@
  * @path:       File path
  * @size:       File size
  * @data_off:   Data offset
+ * @real_path:  Real path
  * @link:       Queue link
  *
  * XXX: Do not reorder anything ABOVE 'link'
@@ -55,6 +56,7 @@ struct hole_ref {
     char path[REF_PATH_LEN];
     size_t size;
     off_t data_off;
+    char *real_path;
     TAILQ_ENTRY(hole_ref) link;
 };
 
@@ -86,7 +88,8 @@ hole_files_destroy(void)
     struct hole_ref *ref, *tmp;
 
     while ((ref = TAILQ_FIRST(&hole_files)) != NULL) {
-        DTRACE("delete %s\n", ref->path);
+        DTRACE("delete %s\n", ref->real_path);
+        free(ref->real_path);
 
         tmp = ref;
         TAILQ_REMOVE(&hole_files, ref, link);
@@ -111,7 +114,7 @@ hole_table_fixup(void)
     printf("* table end @ %zx\n", table_end);
 
     TAILQ_FOREACH(ref, &hole_files, link) {
-        if (stat(ref->path, &sb) < 0) {
+        if (stat(ref->real_path, &sb) < 0) {
             perror("stat");
             continue;
         }
@@ -130,7 +133,7 @@ blob_write(void)
     struct hole_ref *ref;
     int fd, ffd;
     void *data;
-    size_t fsize;
+    size_t fsize, hdr_len;
 
     fd = open(output_path, O_RDWR | O_CREAT | O_TRUNC, 0777);
     if (fd < 0) {
@@ -144,10 +147,10 @@ blob_write(void)
      *      top of the blob.
      */
     TAILQ_FOREACH(ref, &hole_files, link) {
-        write(fd, ref->magic, sizeof(ref->magic));
-        write(fd, ref->path, strlen(ref->path) + 1);
-        write(fd, &ref->size, sizeof(ref->size));
-        write(fd, &ref->data_off, sizeof(ref->data_off));
+        hdr_len =  sizeof(*ref);
+        hdr_len -= sizeof(ref->real_path);
+        hdr_len -= sizeof(ref->link);
+        write(fd, ref, hdr_len);
     }
 
     /*
@@ -155,7 +158,7 @@ blob_write(void)
      *      Now we can write the contents of each file after
      */
     TAILQ_FOREACH(ref, &hole_files, link) {
-        ffd = open(ref->path, O_RDONLY);
+        ffd = open(ref->real_path, O_RDONLY);
         if (ffd < 0) {
             perror("open[ffd]");
             continue;
@@ -191,12 +194,35 @@ blob_write(void)
 }
 
 /*
+ * Strip a path of leading '.' and '/' characters
+ *
+ * @path: Path to strip
+ */
+static const char *
+path_strip(const char *path)
+{
+    const char *p;
+
+    if (path == NULL) {
+        return NULL;
+    }
+
+    p = path;
+    while (*p == '.' || *p == '/') {
+        ++p;
+    }
+
+    return p;
+}
+
+/*
  * Push a file to the hole files table
  */
 static int
 push_file(const char *path)
 {
     struct hole_ref *ref;
+    const char *stripped;
 
     if (path == NULL) {
         return -1;
@@ -209,8 +235,11 @@ push_file(const char *path)
         return -1;
     }
 
+    ref->real_path = strdup(path);
+    stripped = path_strip(path);
+
     memcpy(ref->magic, REF_MAGIC, sizeof(REF_MAGIC));
-    memcpy(ref->path, path, strlen(path) + 1);
+    memcpy(ref->path, stripped, strlen(stripped) + 1);
     ref->data_off = 0;
 
     TAILQ_INSERT_TAIL(&hole_files, ref, link);
