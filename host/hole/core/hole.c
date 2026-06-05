@@ -22,9 +22,6 @@
 #include <dirent.h>
 #include <stdbool.h>
 
-#define FILE_ALIGN 512
-#define ALIGN_UP(value, align)        (((value) + (align)-1) & ~((align)-1))
-
 #define REF_MAGIC "CUMHOLE"
 #define REF_MAGIC_LEN 8
 #define REF_PATH_LEN 256
@@ -106,8 +103,12 @@ hole_table_fixup(void)
     struct stat sb;
     struct hole_ref *ref;
     size_t table_end, offset;
+    size_t hdr_size;
 
-    table_end = file_count * sizeof(struct hole_ref);
+    hdr_size = sizeof(struct hole_ref);
+    hdr_size -= sizeof(ref->real_path);
+    hdr_size -= sizeof(ref->link);
+    table_end = file_count * hdr_size;
     offset = table_end;
 
     printf("* fixing up offsets...\n");
@@ -120,7 +121,7 @@ hole_table_fixup(void)
         }
 
         ref->size = sb.st_size;
-        ref->data_off = ALIGN_UP(table_end + offset, FILE_ALIGN);
+        ref->data_off = offset;
 
         DTRACE("data_off=%zx\n", ref->data_off);
         offset += ref->size;
