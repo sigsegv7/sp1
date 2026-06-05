@@ -21,7 +21,9 @@ HOLE=../../../host/bin/hole
 mkdir -p iso_root/boot/
 
 # Create the initial ramdisk
-$HOLE -f ../data -o iso_root/boot/initrd.hole
+pushd ../data
+$HOLE -f . -o ../boot/iso_root/boot/initrd.hole
+popd
 
 # Copy the kernel to the ISO root
 cp $KERNEL iso_root/boot
