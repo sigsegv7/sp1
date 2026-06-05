@@ -9,9 +9,11 @@
  * consent from Mirocom Laboratories.
  */
 
+#include <sys/cdefs.h>
 #include <os/bpt.h>
 #include <lib/limine.h>
 #include <lib/printf.h>
+#include <string.h>
 
 /* Memory map request */
 static struct limine_memmap_response *memmap_resp = NULL;
@@ -31,6 +33,13 @@ static volatile struct limine_hhdm_request hhdm_req = {
 static struct limine_rsdp_response *rsdp_resp = NULL;
 static volatile struct limine_rsdp_request rsdp_req = {
     .id = LIMINE_RSDP_REQUEST,
+    .revision = 0
+};
+
+/* Module request */
+static struct limine_module_response *mod_resp = NULL;
+static volatile struct limine_module_request mod_req = {
+    .id = LIMINE_MODULE_REQUEST,
     .revision = 0
 };
 
@@ -79,6 +88,35 @@ limine_mem_entry_i(size_t index, struct mem_entry *res)
     return STATUS_SUCCESS;
 }
 
+static status_t
+limine_module_lookup(const char *path, struct bpt_module *res)
+{
+    struct limine_file *mod;
+
+    if (path == NULL || res == NULL) {
+        return STATUS_INVALID_PARAM;
+    }
+
+    if (mod_resp == NULL) {
+        return STATUS_NOT_FOUND;
+    }
+
+    for (size_t i = 0; i < mod_resp->module_count; ++i) {
+        mod = mod_resp->modules[i];
+        if (__likely(*mod->path != *path)) {
+            continue;
+        }
+
+        if (strcmp(mod->path, path) == 0) {
+            res->data = mod->address;
+            res->len = mod->size;
+            return STATUS_SUCCESS;
+        }
+    }
+
+    return STATUS_NOT_FOUND;
+}
+
 status_t
 bpt_init_limine(struct bpt_ops *ops)
 {
@@ -89,8 +127,10 @@ bpt_init_limine(struct bpt_ops *ops)
     hhdm_resp = hhdm_req.response;
     memmap_resp = memmap_req.response;
     rsdp_resp = rsdp_req.response;
+    mod_resp = mod_req.response;
 
     ops->get_protovar = limine_get_protovar;
     ops->mem_entry_i = limine_mem_entry_i;
+    ops->module_lookup = limine_module_lookup;
     return STATUS_SUCCESS;
 }

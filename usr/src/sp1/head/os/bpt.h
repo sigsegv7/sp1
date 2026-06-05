@@ -45,6 +45,17 @@ struct mem_entry {
 };
 
 /*
+ * Represents a module passed by the bootloader
+ *
+ * @data:  Module data
+ * @len:   Module length
+ */
+struct bpt_module {
+    void *data;
+    size_t len;
+};
+
+/*
  * The protovar stores a list of information passed
  * by the bootloader.
  *
@@ -61,6 +72,7 @@ struct bpt_protovar {
 struct bpt_ops {
     status_t(*get_protovar)(struct bpt_protovar *res);
     status_t(*mem_entry_i)(size_t index, struct mem_entry *res);
+    status_t(*module_lookup)(const char *path, struct bpt_module *res);
 };
 
 /*
@@ -81,6 +93,11 @@ status_t bpt_mem_entry_i(size_t index, struct mem_entry *res);
  * Initialize the boot protocol translation layer
  */
 status_t bpt_init(void);
+
+/*
+ * Lookup a module by path
+ */
+status_t bpt_module_lookup(const char *path, struct bpt_module *res);
 
 /* Boot protocol specific init funcs */
 status_t bpt_init_limine(struct bpt_ops *ops);

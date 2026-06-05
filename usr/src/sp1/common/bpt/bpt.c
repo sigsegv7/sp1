@@ -51,6 +51,16 @@ bpt_mem_entry_i(size_t index, struct mem_entry *res)
 }
 
 status_t
+bpt_module_lookup(const char *path, struct bpt_module *res)
+{
+    if (path == NULL || res == NULL) {
+        return STATUS_INVALID_PARAM;
+    }
+
+    return ops.module_lookup(path, res);
+}
+
+status_t
 bpt_init(void)
 {
     switch (*BOOT_PROTO) {
