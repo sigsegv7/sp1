@@ -25,6 +25,7 @@
  * @device_id:      PCI device ID
  * @class_id:       PCI class ID
  * @subclass_id:    PCI subclass ID
+ * @bar:            Base address registers
  * @link:           Queue link
  */
 struct pci_device {
@@ -35,6 +36,7 @@ struct pci_device {
     uint16_t device_id;
     uint8_t class_id;
     uint8_t subclass_id;
+    uint32_t bar[6];
     TAILQ_ENTRY(pci_device) link;
 };
 

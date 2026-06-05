@@ -63,6 +63,18 @@ struct pci_driver {
 };
 
 /*
+ * Obtain a virtual address from a specific base address
+ * register index.
+ *
+ * @dev:        Device to obtain BAR from
+ * @bar_num:    Base address register index
+ *
+ * Returns the virtual address base on success, otherwise NULL
+ * on failure.
+ */
+void *pci_resolve_bar(struct pci_device *dev, uint8_t bar_num);
+
+/*
  * Resolve a PCI device via its advertisement structure
  *
  * @adv: Adverisement structure to lookup

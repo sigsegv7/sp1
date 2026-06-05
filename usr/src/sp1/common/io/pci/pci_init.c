@@ -18,6 +18,7 @@
 #include <io/pci/pcireg.h>
 #include <mu/pci.h>
 #include <mm/kalloc.h>
+#include <mm/vm.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -44,10 +45,19 @@ pci_device_add(struct pci_device *dev)
     class = PCIREG_CLASS(classrev);
     subclass = PCIREG_SUBCLASS(classrev);
 
+    /* Device IDs */
     dev->vendor_id = vendor_id;
     dev->device_id = device_id;
     dev->class_id = class;
     dev->subclass_id = subclass;
+
+    /* Base address registers */
+    dev->bar[0] = cam.cam_readl(dev, PCIREG_BAR0);
+    dev->bar[1] = cam.cam_readl(dev, PCIREG_BAR1);
+    dev->bar[2] = cam.cam_readl(dev, PCIREG_BAR2);
+    dev->bar[3] = cam.cam_readl(dev, PCIREG_BAR3);
+    dev->bar[4] = cam.cam_readl(dev, PCIREG_BAR4);
+    dev->bar[5] = cam.cam_readl(dev, PCIREG_BAR5);
 
     pr_trace("detected %04x:%04x\n", device_id, vendor_id);
     dev_cpy = kalloc(sizeof(*dev_cpy));
@@ -157,6 +167,36 @@ pci_sc_match(struct pci_device *dev, struct pci_adv *adv)
     }
 
     return false;
+}
+
+void *
+pci_resolve_bar(struct pci_device *dev, uint8_t bar_num)
+{
+    uintptr_t bar_pma;
+    uint32_t bar, lo, hi;
+
+    if (dev == NULL || bar_num > 5) {
+        return NULL;
+    }
+
+    /* Don't accept I/O space BARs */
+    bar = dev->bar[bar_num];
+    if (ISSET(bar, BIT(0))) {
+        return NULL;
+    }
+
+    /* Compute the physical address */
+    if (PCI_BAR_32(bar)) {
+        bar_pma = bar & 0xFFFFFFF0;
+    } else if (PCI_BAR_64(bar)) {
+        lo = bar & 0xFFFFFFF0;
+        hi = dev->bar[bar_num + 1] & 0xFFFFFFFF;
+        bar_pma = ((uint64_t)hi << 32) | lo;
+    } else {
+        return NULL;
+    }
+
+    return pma_to_vma(bar_pma);
 }
 
 struct pci_device *
