@@ -15,6 +15,7 @@
 #include <mm/physmem.h>
 #include <mm/vm.h>
 #include <mu/param.h>
+#include <string.h>
 
 /*
  * Allocate a memory box entry
@@ -82,6 +83,8 @@ membox_alloc(struct membox *membox, size_t size, membox_type_t type)
 
         entry->ptr = pma_to_vma(pma);
         entry->size = size;
+
+        memset(entry->ptr, 0, entry->size);
         membox_append(membox, entry);
         return entry->ptr;
     default:
