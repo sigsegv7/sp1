@@ -14,6 +14,7 @@
 #include <mm/physmem.h>
 #include <mm/vm.h>
 #include <mu/param.h>
+#include <os/cpulock.h>
 #include <lib/printf.h>
 #include <os/bpt.h>
 #include <string.h>
@@ -54,6 +55,9 @@ static size_t last_idx = 0;
 static size_t bitmap_free_start = 0;
 static size_t highest_frame_idx = 0;
 static uint8_t *bitmap;
+
+/* Global lock */
+static cpu_lock_t lock;
 
 static inline void
 physmem_print_size(const char *title, size_t len)
@@ -185,11 +189,13 @@ mm_physmem_alloc(size_t count)
         return 0;
     }
 
+    cpu_lock_acquire(&lock, true);
     if ((ret = __physmem_alloc_frame(count)) == 0) {
         last_idx = 0;
         ret = __physmem_alloc_frame(count);
     }
 
+    cpu_lock_release(&lock);
     return ret;
 }
 
@@ -201,10 +207,13 @@ mm_physmem_free(uintptr_t base, size_t count)
 {
     size_t stop_at = base + (count * PAGESIZE);
 
+    cpu_lock_acquire(&lock, true);
     base = ALIGN_UP(base, PAGESIZE);
     for (uintptr_t p = base; p < stop_at; p += PAGESIZE) {
         CLRBIT(bitmap, p / PAGESIZE);
     }
+
+    cpu_lock_release(&lock);
 }
 
 /*
