@@ -78,6 +78,18 @@ md_gdt_load:
     pop %r12
     retq
 
+    .globl md_cpu_irqen
+md_cpu_irqen:
+    pushf
+    pop %rax
+    test $1<<9, %rax
+    jz bad
+    mov $1, %rax
+    retq
+bad:
+    mov $0, %rax
+    retq
+
      .section .data
     .globl g_GDT
 g_GDT:
