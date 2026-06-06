@@ -109,7 +109,7 @@ static status_t
 xhci_hc_reset(struct xhci_hc *hc)
 {
     struct xhci_opregs *opregs;
-    uint32_t usbcmd;
+    uint32_t usbcmd, config;
     status_t status;
 
     if (hc == NULL) {
@@ -133,6 +133,11 @@ xhci_hc_reset(struct xhci_hc *hc)
     if (status != STATUS_SUCCESS) {
         pr_trace("error: timeout on USBSTS_CNR\n");
     }
+
+    /* Enable all device slots */
+    config = mmio_read32(&opregs->config);
+    config |= hc->max_slots;
+    mmio_write32(&opregs->config, config);
 
     return STATUS_SUCCESS;
 }
