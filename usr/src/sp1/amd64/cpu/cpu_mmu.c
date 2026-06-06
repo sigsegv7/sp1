@@ -65,6 +65,8 @@ mmu_prot_to_pte(int prot)
         pte_flags |= PTE_RW;
     if (ISSET(prot, PROT_EXEC))
         pte_flags &= ~PTE_NX;
+    if (ISSET(prot, PROT_USER))
+        pte_flags |= PTE_US;
 
     return pte_flags;
 }

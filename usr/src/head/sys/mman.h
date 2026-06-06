@@ -18,5 +18,6 @@
 #define PROT_READ   0x00        /* Mapping is readable */
 #define PROT_WRITE  BIT(0)      /* Mapping is writable */
 #define PROT_EXEC   BIT(1)      /* Mapping is executable */
+#define PROT_USER   BIT(2)      /* Mapping is user accessible */
 
 #endif  /* !_SYS_MMAN_H_ */
