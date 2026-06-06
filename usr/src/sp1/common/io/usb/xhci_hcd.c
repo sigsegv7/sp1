@@ -102,6 +102,47 @@ xhci_hc_halt(struct xhci_hc *hc)
 }
 
 /*
+ * Start a host controller
+ *
+ * @hc: Host controller to start
+ */
+static status_t
+xhci_hc_start(struct xhci_hc *hc)
+{
+    struct xhci_opregs *opregs;
+    uint32_t usbcmd, usbsts;
+    status_t status;
+
+    if (hc == NULL) {
+        return STATUS_INVALID_PARAM;
+    }
+
+    opregs = hc->oper;
+    usbsts = mmio_read32(&opregs->usbsts);
+
+    /* Do not start it if it's already running */
+    if (!ISSET(usbsts, USBSTS_HCH)) {
+        pr_trace("error: host controller already started\n");
+        return STATUS_IO_ERROR;
+    }
+
+    /* Start the host controller */
+    usbcmd = mmio_read32(&opregs->usbcmd);
+    usbcmd |= USBCMD_RUN;
+    mmio_write32(&opregs->usbcmd, usbcmd);
+
+    /* Wait for the host controller to start */
+    status = xhci_poll_reg(&opregs->usbsts, USBSTS_HCH, false);
+    if (status != STATUS_SUCCESS) {
+        pr_trace("error: timeout on USBSTS_HCH during start\n");
+        return status;
+    }
+
+    return STATUS_SUCCESS;
+
+}
+
+/*
  * Reset the host controller
  *
  * @hc: Host controller to reset
@@ -219,6 +260,13 @@ xhci_hc_init(void *mmio_base)
     crcr =  CRCR_RCS << CRCR_RCS_SHIFT;
     crcr |= pma << CRCR_RING_SHIFT;
     mmio_write64(&oper_regs->cmd_ring, crcr);
+
+    status = xhci_hc_start(&hc);
+    if (status != STATUS_SUCCESS) {
+        pr_trace("error: failed to start host controller\n");
+        membox_destroy(&hc.membox);
+        return status;
+    }
 
     return STATUS_SUCCESS;
 }
