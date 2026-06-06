@@ -1,0 +1,26 @@
+//
+// Copyright (c) 2026, Mirocom Laboratories
+// All rights reserved.
+//
+// The following sources are CONFIDENTIAL and PROPRIETARY
+// property of Mirocom Laboratories. Unauthorized copying,
+// use, distribution or modification of this file, in whole
+// and in part, is strictly prohibited without the prior written
+// consent from Mirocom Laboratories.
+//
+
+//
+// A procedure is denoted by the 'proc' keyword followed by
+// an identifier [name], an arguments list and a type after
+// the arrow operator.
+//
+proc add(u32 a, u32 b) -> u32 {
+    // Forth-like operations, add A and B together
+    return a b +;
+}
+
+/// ...
+
+proc main() -> u8 {
+    return add(1, 1);
+}
