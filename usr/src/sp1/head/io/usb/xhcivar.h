@@ -16,6 +16,9 @@
 #include <io/usb/xhcireg.h>
 #include <os/membox.h>
 
+#define TRB_SIZE sizeof(struct xhci_trb_nop)
+#define TRB_ENTRIES 32
+
 /*
  * Represents a xHCI host controller
  *
@@ -31,6 +34,19 @@ struct xhci_hc {
     uint8_t max_slots;
     uint8_t max_ports;
     struct membox membox;
+};
+
+/*
+ * Represents a transfer request block for NO-OP operations
+ *
+ * See section 6.4.3.1 of the xHCI spec
+ */
+struct xhci_trb_nop {
+    uint8_t cycle  : 1;
+    uint16_t reserved : 1;
+    uint8_t type : 6;
+    uint16_t reserved1;
+    uint32_t reserved2[3];
 };
 
 #endif  /* !_USB_XHCIVAR_H_ */

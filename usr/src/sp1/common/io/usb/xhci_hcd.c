@@ -149,6 +149,7 @@ xhci_hc_init(void *mmio_base)
     size_t slots_enabled, len;
     uintptr_t pma;
     uint32_t config;
+    uint64_t crcr;
     void *tmp_p;
     status_t status;
 
@@ -204,6 +205,20 @@ xhci_hc_init(void *mmio_base)
     /* Set the DCBAAP register */
     pma = vma_to_pma(tmp_p);
     mmio_write64(&oper_regs->dcbaa_ptr, pma);
+
+    len = TRB_SIZE * TRB_ENTRIES;
+    tmp_p = membox_alloc(&hc.membox, len, MEM_TYPE_PHYSICAL);
+    if (tmp_p == NULL) {
+        pr_trace("error: failed to allocate trb array\n");
+        membox_destroy(&hc.membox);
+        return STATUS_NO_MEMORY;
+    }
+
+    /* Setup the command ring */
+    pma = vma_to_pma(tmp_p);
+    crcr =  CRCR_RCS << CRCR_RCS_SHIFT;
+    crcr |= pma << CRCR_RING_SHIFT;
+    mmio_write64(&oper_regs->cmd_ring, crcr);
 
     return STATUS_SUCCESS;
 }

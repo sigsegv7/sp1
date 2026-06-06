@@ -16,6 +16,9 @@
 #include <sys/param.h>
 #include <sys/cdefs.h>
 
+/* Default value of CRCR.RCS */
+#define CRCR_RCS 1
+
 /*
  * Host Controller Capability Registers
  *
@@ -69,5 +72,12 @@ struct xhci_opregs {
 /* CAPS.HCSPARAMS2 fields */
 #define XHCI_MAX_SP_HI(HCSPARAMS2) ((HCSPARAMS2 >> 25) & 0x1F)
 #define XHCI_MAX_SP_LO(HCSPARAMS2) ((HCSPARAMS2 >> 31) & 0x1F)
+
+/* Command ring control register */
+#define CRCR_RCS_SHIFT  0
+#define CRCR_CS_SHIFT   1
+#define CRCR_CA_SHIFT   2
+#define CRCR_CRR_SHIFT  3
+#define CRCR_RING_SHIFT 6
 
 #endif  /* !_USB_XHCIREG_H_ */
