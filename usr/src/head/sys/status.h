@@ -28,5 +28,6 @@ typedef uint16_t status_t;
 #define STATUS_NAME_TOO_LONG 7       /* Name is too long */
 #define STATUS_NOT_DIRECTORY 8       /* File is not a directory */
 #define STATUS_TIMED_OUT     9       /* Operation timed out */
+#define STATUS_NOT_EXEC      10      /* Not executable */
 
 #endif  /* !_SYS_STATUS_H_ */
