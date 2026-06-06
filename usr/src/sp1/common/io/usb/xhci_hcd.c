@@ -21,6 +21,7 @@
 #include <mu/mmio.h>
 #include <lib/printf.h>
 #include <stdbool.h>
+#include <mm/vm.h>
 
 #define pr_trace(fmt, ...) \
     printf("xhci-hcd: " fmt, ##__VA_ARGS__)
@@ -109,7 +110,7 @@ static status_t
 xhci_hc_reset(struct xhci_hc *hc)
 {
     struct xhci_opregs *opregs;
-    uint32_t usbcmd, config;
+    uint32_t usbcmd;
     status_t status;
 
     if (hc == NULL) {
@@ -134,11 +135,6 @@ xhci_hc_reset(struct xhci_hc *hc)
         pr_trace("error: timeout on USBSTS_CNR\n");
     }
 
-    /* Enable all device slots */
-    config = mmio_read32(&opregs->config);
-    config |= hc->max_slots;
-    mmio_write32(&opregs->config, config);
-
     return STATUS_SUCCESS;
 }
 
@@ -150,10 +146,20 @@ xhci_hc_init(void *mmio_base)
 {
     struct xhci_caps *cap_regs;
     struct xhci_opregs *oper_regs;
+    size_t slots_enabled, len;
+    uintptr_t pma;
+    uint32_t config;
+    void *tmp_p;
     status_t status;
 
     if (mmio_base == NULL) {
         return STATUS_INVALID_PARAM;
+    }
+
+    status = membox_init(&hc.membox);
+    if (status != STATUS_SUCCESS) {
+        pr_trace("error: failed to initialize memory box\n");
+        return status;
     }
 
     cap_regs = mmio_base;
@@ -181,6 +187,22 @@ xhci_hc_init(void *mmio_base)
         pr_trace("error: failed to reset host controller\n");
         return status;
     }
+
+    /* Enable all device slots */
+    slots_enabled = hc.max_slots;
+    config = mmio_read32(&oper_regs->config);
+    config |= slots_enabled;
+    mmio_write32(&oper_regs->config, config);
+
+    len = sizeof(uintptr_t) * slots_enabled;
+    tmp_p = membox_alloc(&hc.membox, len, MEM_TYPE_PHYSICAL);
+    if (tmp_p == NULL) {
+        pr_trace("error: failed to allocate dcbaa\n");
+    }
+
+    /* Set the DCBAAP register */
+    pma = vma_to_pma(tmp_p);
+    mmio_write64(&oper_regs->dcbaa_ptr, pma);
 
     return STATUS_SUCCESS;
 }

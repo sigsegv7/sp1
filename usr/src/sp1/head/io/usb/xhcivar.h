@@ -14,6 +14,7 @@
 
 #include <sys/types.h>
 #include <io/usb/xhcireg.h>
+#include <os/membox.h>
 
 /*
  * Represents a xHCI host controller
@@ -22,12 +23,14 @@
  * @oper:      Host controller operational registers
  * @max_slots: Maximum device slots
  * @max_ports: Maximum addressable ports
+ * @membox:    Per-controller memory box
  */
 struct xhci_hc {
     struct xhci_caps *caps;
     struct xhci_opregs *oper;
     uint8_t max_slots;
     uint8_t max_ports;
+    struct membox membox;
 };
 
 #endif  /* !_USB_XHCIVAR_H_ */
