@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "cumc/state.h"
+#include "cumc/trace.h"
 
 void
 help(void)
@@ -51,7 +52,7 @@ main(int argc, char **argv)
     int opt;
 
     if (argc < 2) {
-        printf("fatal: too few arguments\n");
+        cum_error("ima dumb slut, too few arguments\n");
         help();
         return -1;
     }
