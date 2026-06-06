@@ -121,10 +121,17 @@ xhci_hc_reset(struct xhci_hc *hc)
     usbcmd |= USBCMD_HCRST;
     mmio_write32(&opregs->usbcmd, usbcmd);
 
+    /* Wait until the reset is complete */
     status = xhci_poll_reg(&opregs->usbcmd, USBCMD_HCRST, false);
     if (status != STATUS_SUCCESS) {
         pr_trace("error: timeout on USBCMD_HCRST\n");
         return status;
+    }
+
+    /* Wait until the controller is ready */
+    status = xhci_poll_reg(&opregs->usbsts, USBSTS_CNR, false);
+    if (status != STATUS_SUCCESS) {
+        pr_trace("error: timeout on USBSTS_CNR\n");
     }
 
     return STATUS_SUCCESS;
