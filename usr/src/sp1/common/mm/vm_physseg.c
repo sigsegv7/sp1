@@ -197,7 +197,7 @@ mm_physmem_alloc(size_t count)
  * Central frame freeing routine
  */
 void
-pmm_free_frame(uintptr_t base, size_t count)
+mm_physmem_free(uintptr_t base, size_t count)
 {
     size_t stop_at = base + (count * PAGESIZE);
 
