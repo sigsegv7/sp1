@@ -14,7 +14,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include "cumc/ptrbox.h"
+#include "common/ptrbox.h"
 
 /*
  * Allocate a pointer box entry to be used

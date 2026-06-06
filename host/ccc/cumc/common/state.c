@@ -13,7 +13,7 @@
 #include <stddef.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "cumc/state.h"
+#include "common/state.h"
 
 int
 cumc_state_init(const char *input_path, struct cumc_state *res)

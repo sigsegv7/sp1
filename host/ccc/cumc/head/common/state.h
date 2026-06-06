@@ -9,8 +9,8 @@
  * consent from Mirocom Laboratories.
  */
 
-#ifndef _CUMC_STATE_H_
-#define _CUMC_STATE_H_ 1
+#ifndef _COMMON_STATE_H_
+#define _COMMON_STATE_H_ 1
 
 /*
  * Represents the compiler state machine
@@ -38,4 +38,4 @@ int cumc_state_init(const char *input_path, struct cumc_state *res);
  */
 void cumc_state_destroy(struct cumc_state *state);
 
-#endif  /* !_CUMC_STATE_H_ */
+#endif  /* !_COMMON_STATE_H_ */

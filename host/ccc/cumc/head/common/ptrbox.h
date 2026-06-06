@@ -9,8 +9,8 @@
  * consent from Mirocom Laboratories.
  */
 
-#ifndef _CUMC_PTRBOX_H_
-#define _CUMC_PTRBOX_H_ 1
+#ifndef _COMMON_PTRBOX_H_
+#define _COMMON_PTRBOX_H_ 1
 
 /*
  * Represents a pointer box entry in which allocated data can
@@ -74,4 +74,4 @@ char *ptrbox_strdup(struct ptrbox *ptrbox, const char *s);
  */
 void ptrbox_destroy(struct ptrbox *ptrbox);
 
-#endif  /* !_CUMC_PTRBOX_H_ */
+#endif  /* !_COMMON_PTRBOX_H_ */

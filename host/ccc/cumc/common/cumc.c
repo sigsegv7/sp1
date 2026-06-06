@@ -11,8 +11,8 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include "cumc/state.h"
-#include "cumc/trace.h"
+#include "common/state.h"
+#include "common/trace.h"
 
 void
 help(void)

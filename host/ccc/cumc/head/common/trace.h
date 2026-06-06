@@ -9,8 +9,8 @@
  * consent from Mirocom Laboratories.
  */
 
-#ifndef _CUMC_TRACE_H_
-#define _CUMC_TRACE_H_ 1
+#ifndef _COMMON_TRACE_H_
+#define _COMMON_TRACE_H_ 1
 
 #include <stdio.h>
 
@@ -21,4 +21,4 @@
 #define cum_warn(fmt, ...) \
     printf("[\033[35;40mwarn\033[0m]: " fmt, ##__VA_ARGS__)
 
-#endif  /* !_CUMC_TRACE_H_ */
+#endif  /* !_COMMON_TRACE_H_ */
