@@ -15,9 +15,9 @@
 #include <mm/tlsf.h>
 #include <mm/physmem.h>
 #include <mm/vm.h>
+#include <mu/param.h>
 #include <stdbool.h>
 
-#define PAGESIZE 4096  /* TODO: Do not hardcode this */
 #define KALLOC_POOL_PAGES     (KALLOC_POOL_SZ / PAGESIZE)
 #define KALLOC_POOL_SZ        0x400000  /* 4 MiB */
 
