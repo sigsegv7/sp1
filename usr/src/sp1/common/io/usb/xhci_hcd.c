@@ -15,6 +15,8 @@
 #include <io/pci/device.h>
 #include <io/usb/xhcireg.h>
 #include <io/usb/xhcivar.h>
+#include <io/clkdev/ticker.h>
+#include <os/cum.h>
 #include <os/driver.h>
 #include <mu/mmio.h>
 #include <lib/printf.h>
@@ -23,8 +25,9 @@
 #define pr_trace(fmt, ...) \
     printf("xhci-hcd: " fmt, ##__VA_ARGS__)
 
-#define HCD_CLASS       0x0C
-#define HCD_SUBCLASS    0x03
+#define HCD_CLASS        0x0C
+#define HCD_SUBCLASS     0x03
+#define HCD_TIMEOUT_MSEC 1000
 
 /* Forward declarations */
 static struct pci_driver self_pci;
@@ -32,19 +35,51 @@ static struct driver_desc driver_desc;
 
 /* Globals */
 static struct xhci_hc hc;
+static struct clk_ticker *ticker;
+
+/*
+ * Poll a 32-bit xHC register
+ *
+ * @reg:        Register address to poll
+ * @mask:       Mask to poll for
+ * @pollset:    If true, poll until the mask is set
+ */
+static status_t
+xhci_poll_reg(volatile uint32_t *reg, uint32_t mask, bool pollset)
+{
+    size_t count_goal;
+    size_t count_start, count = 0;
+    uint32_t v;
+
+    count_start = ticker_get_count(ticker);
+    count_goal = ticker_msec_delta(ticker, HCD_TIMEOUT_MSEC);
+
+    while (count < count_start + count_goal) {
+        v = mmio_read32(reg);
+
+        if (pollset && ISSET(v, mask)) {
+            return STATUS_SUCCESS;
+        } else if (!pollset && !ISSET(v, mask)) {
+            return STATUS_SUCCESS;
+        }
+
+        count = ticker_get_count(ticker);
+    }
+
+    return STATUS_TIMED_OUT;
+}
 
 /*
  * Halt a host controller
  *
  * @hc: Host controller to halt
- *
- * TODO: Implemenet better polling
  */
 static status_t
 xhci_hc_halt(struct xhci_hc *hc)
 {
     struct xhci_opregs *opregs;
     uint32_t usbcmd, usbsts;
+    status_t status;
 
     if (hc == NULL) {
         return STATUS_INVALID_PARAM;
@@ -57,9 +92,9 @@ xhci_hc_halt(struct xhci_hc *hc)
     mmio_write32(&opregs->usbcmd, usbcmd);
 
     /* Wait for the host controller to halt */
-    usbsts = mmio_read32(&opregs->usbsts);
-    while (!ISSET(usbsts, USBSTS_HCH)) {
-        usbsts = mmio_read32(&opregs->usbsts);
+    status = xhci_poll_reg(&opregs->usbsts, USBSTS_HCH, true);
+    if (status != STATUS_SUCCESS) {
+        pr_trace("error: timeout on USBSTS_HCH\n");
     }
 
     return STATUS_SUCCESS;
@@ -69,14 +104,13 @@ xhci_hc_halt(struct xhci_hc *hc)
  * Reset the host controller
  *
  * @hc: Host controller to reset
- *
- * TODO: Implement better polling
  */
 static status_t
 xhci_hc_reset(struct xhci_hc *hc)
 {
     struct xhci_opregs *opregs;
     uint32_t usbcmd;
+    status_t status;
 
     if (hc == NULL) {
         return STATUS_INVALID_PARAM;
@@ -87,9 +121,10 @@ xhci_hc_reset(struct xhci_hc *hc)
     usbcmd |= USBCMD_HCRST;
     mmio_write32(&opregs->usbcmd, usbcmd);
 
-    /* Wait for the reset to finish */
-    while (ISSET(usbcmd, USBCMD_HCRST)) {
-        usbcmd = mmio_read32(&opregs->usbcmd);
+    status = xhci_poll_reg(&opregs->usbcmd, USBCMD_HCRST, false);
+    if (status != STATUS_SUCCESS) {
+        pr_trace("error: timeout on USBCMD_HCRST\n");
+        return status;
     }
 
     return STATUS_SUCCESS;
@@ -142,11 +177,23 @@ static status_t
 xhci_driver_init(struct driver_desc *desc)
 {
     status_t status;
+    struct cum_resolve resolve;
+    struct cum_object *tmr_obj;
 
     if (desc == NULL) {
         return STATUS_INVALID_PARAM;
     }
 
+    resolve.lookup = NULL;
+    resolve.path = "/clkdev/ticker0";
+    resolve.flags = 0;
+    status = cum_resolve(&resolve);
+
+    if (status != STATUS_SUCCESS) {
+        return status;
+    }
+
+    ticker = TICKER_DATA_FROM(resolve.lookup);
     status = pci_driver_register(&self_pci);
     if (status != STATUS_SUCCESS) {
         return status;
