@@ -198,6 +198,7 @@ xhci_hc_init(void *mmio_base)
     tmp_p = membox_alloc(&hc.membox, len, MEM_TYPE_PHYSICAL);
     if (tmp_p == NULL) {
         pr_trace("error: failed to allocate dcbaa\n");
+        return STATUS_NO_MEMORY;
     }
 
     /* Set the DCBAAP register */
