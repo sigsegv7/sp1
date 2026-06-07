@@ -14,10 +14,12 @@
 #include <os/bpt.h>
 #include <os/knot.h>
 #include <os/cum.h>
+#include <os/task.h>
 #include <os/driver.h>
 #include <os/initrd.h>
 #include <lib/printf.h>
 #include <mu/cpu.h>
+#include <mu/task.h>
 #include <mm/physmem.h>
 #include <mm/vm.h>
 #include <mm/kalloc.h>
@@ -84,7 +86,6 @@ main(void)
     /* Initialize the ramdisk */
     initrd_init();
 
-    printf("[*] sp1 is pre-alpha\n");
-    printf("[*] knotting kernel...\n");
-    knot("end of kernel reached - halting\n");
+    /* Enter task mode and don't return !! */
+    mu_task_mode();
 }

@@ -245,6 +245,11 @@ page_fault:
 
     .globl lapic_tmr_isr
 lapic_tmr_isr:
-    ud2
-    cli
-    hlt
+    KFENCE
+    push_trapframe 0x81
+    mov %rsp, %rdi
+    call mu_task_switch
+    KFENCE
+    call lapic_eoi
+    pop_trapframe 0x81
+    iretq
