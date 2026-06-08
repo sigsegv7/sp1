@@ -26,10 +26,11 @@ static volatile size_t pid = 0;
 static status_t
 task_init_stack(struct task *task, uint32_t flags)
 {
-    struct mmu_vfr vfr;
+    struct mmu_vfr *vfr;
     uintptr_t stack_pma;
     struct vm_map vm_map;
     status_t status;
+    int prot = PROT_READ | PROT_WRITE;
 
     if (task == NULL) {
         return STATUS_INVALID_PARAM;
@@ -40,6 +41,8 @@ task_init_stack(struct task *task, uint32_t flags)
         return STATUS_NO_MEMORY;
     }
 
+    vfr = &task->pcb.vfr;
+
     /* Just add higher half if kernel stack */
     if (!ISSET(flags, TASK_USER)) {
         task->stack_base = (uintptr_t)pma_to_vma(stack_pma);
@@ -48,13 +51,12 @@ task_init_stack(struct task *task, uint32_t flags)
 
     task->stack_base = stack_pma;
     task->stack_size = BASE_STACK_SIZE;
-    mu_mmu_readvfr(&vfr);
 
     vm_map.ps = PAGESIZE_4K;
     vm_map.vma_base = stack_pma;
     vm_map.pma_base = stack_pma;
     vm_map.length = BASE_STACK_SIZE;
-    status = mm_vm_map(&vfr, &vm_map, PROT_READ | PROT_WRITE);
+    status = mm_vm_map(vfr, &vm_map, PROT_READ | PROT_WRITE | PROT_USER);
 
     if (status != STATUS_SUCCESS) {
         return status;
@@ -80,7 +82,6 @@ task_init(uint32_t flags, uintptr_t ip, struct task *res)
     cpu_lock_release(&pid_lock);
 
     res->flags = flags;
-    mu_task_init(res, ip);
 
     pcbp = &res->pcb;
 
@@ -96,6 +97,7 @@ task_init(uint32_t flags, uintptr_t ip, struct task *res)
         goto fail;
     }
 
+    mu_task_init(res, ip);
     return STATUS_SUCCESS;
 fail:
     cpu_lock_acquire(&pid_lock, false);
