@@ -12,9 +12,11 @@
 #ifndef _OS_TASK_H_
 #define _OS_TASK_H_ 1
 
+#include <sys/queue.h>
 #include <sys/param.h>
 #include <sys/status.h>
 #include <sys/types.h>
+#include <os/schedvar.h>
 #include <mu/pcb.h>
 
 /* Task flags */
@@ -32,6 +34,7 @@
  * @pcb:    Process control block
  * @stack_base: Task stack base
  * @stack_size: Task stack size
+ * @runq_link:  Queue link
  */
 struct task {
     pid_t pid;
@@ -39,14 +42,16 @@ struct task {
     struct pcb pcb;
     uintptr_t stack_base;
     size_t stack_size;
+    TAILQ_ENTRY(task) runq_link;
 };
 
 /*
  * Initialize a task structure
  *
  * @flags: Flags for task
+ * @ip:    Instruction pointer
  * @res:   Result is written here
  */
-status_t task_init(uint32_t flags, struct task *res);
+status_t task_init(uint32_t flags, uintptr_t ip, struct task *res);
 
 #endif  /* !_OS_TASK_H_ */

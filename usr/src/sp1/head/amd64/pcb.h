@@ -13,15 +13,18 @@
 #define _MACHINE_PCB_H_ 1
 
 #include <machine/vfr.h>
+#include <machine/frame.h>
 
 /*
  * Represents the process control block which holds
  * low-level information regarding a specific process
  *
  * @vfr: Virtual fuck region
+ * @tf:  Trapframe snapshot
  */
 struct pcb {
     struct mmu_vfr vfr;
+    struct trapframe tf;
 };
 
 #endif  /* !_MACHINE_PCB_H_ */

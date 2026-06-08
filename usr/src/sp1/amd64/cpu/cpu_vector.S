@@ -249,7 +249,7 @@ lapic_tmr_isr:
     push_trapframe 0x81
     mov %rsp, %rdi
     call mu_task_switch
-    KFENCE
     call lapic_eoi
     pop_trapframe 0x81
+    KFENCE
     iretq

@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/atomic.h>
 #include <mu/mmu.h>
+#include <mu/task.h>
 #include <mu/param.h>
 #include <mm/vm.h>
 #include <mm/physmem.h>
@@ -63,7 +64,7 @@ task_init_stack(struct task *task, uint32_t flags)
 }
 
 status_t
-task_init(uint32_t flags, struct task *res)
+task_init(uint32_t flags, uintptr_t ip, struct task *res)
 {
     struct mmu_vfr vfr;
     struct pcb *pcbp;
@@ -79,6 +80,8 @@ task_init(uint32_t flags, struct task *res)
     cpu_lock_release(&pid_lock);
 
     res->flags = flags;
+    mu_task_init(res, ip);
+
     pcbp = &res->pcb;
 
     /* Fork the current VFR, we are the parent */

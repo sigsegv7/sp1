@@ -13,6 +13,8 @@
 #define _MU_CPU_H_ 1
 
 #include <sys/types.h>
+#include <sys/queue.h>
+#include <os/task.h>
 #include <machine/mcb.h>    /* shared */
 #include <machine/cpudef.h> /* shared */
 
@@ -27,10 +29,14 @@
  *
  * @id:   Processor ID
  * @mcb:  Machine core block
+ * @cur_task: Current task
+ * @runq: Run queue
  */
 struct cpu_info {
     uint8_t id;
     struct mcb mcb;
+    struct task *cur_task;
+    struct sched_runq runq;
 };
 
 /*

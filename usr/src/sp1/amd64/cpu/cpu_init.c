@@ -11,6 +11,7 @@
 
 #include <mu/cpu.h>
 #include <lib/printf.h>
+#include <os/schedvar.h>
 #include <machine/cpuid.h>
 #include <machine/idt.h>
 #include <machine/lapic.h>
@@ -136,6 +137,10 @@ mu_cpu_preinit(struct cpu_info *ci)
 
     /* Set current processor */
     md_wrmsr(IA32_GS_BASE, (uintptr_t)ci);
+
+    /* Initialize the run queue */
+    ci->runq.lock = 0;
+    TAILQ_INIT(&ci->runq.runq);
 }
 
 struct cpu_info *

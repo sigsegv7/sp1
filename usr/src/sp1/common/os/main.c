@@ -87,5 +87,6 @@ main(void)
     initrd_init();
 
     /* Enter task mode and don't return !! */
-    mu_task_mode();
+    knot("scheduler is in construction\n");
+    mu_task_mode(NULL);
 }

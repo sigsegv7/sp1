@@ -14,6 +14,7 @@
 
 #include <sys/types.h>
 #include <sys/cdefs.h>
+#include <os/task.h>
 #include <mu/frame.h>
 
 /*
@@ -24,8 +25,31 @@
 void mu_task_switch(struct trapframe *framep);
 
 /*
- * Enter tasking mode
+ * Initialize low-level task fields
+ *
+ * @task: Task to initialize
+ * @ip:   Instruction pointer
  */
-__no_return void mu_task_mode(void);
+void mu_task_init(struct task *task, uintptr_t ip);
+
+/*
+ * Instruction pointer to set
+ *
+ * @task: Task to set IP of
+ * @ip:   IP to set
+ */
+void mu_task_set_ip(struct task *task, uintptr_t ip);
+
+/*
+ * Start a user task
+ */
+void mu_task_kick(struct task *task);
+
+/*
+ * Enter tasking mode
+ *
+ * @root: Root task
+ */
+__no_return void mu_task_mode(struct task *root);
 
 #endif  /* !_MU_TASK_H_ */
