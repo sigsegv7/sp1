@@ -16,13 +16,16 @@
 #include <machine/idt.h>
 #include <machine/lapic.h>
 #include <machine/msr.h>
+#include <machine/mcb.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define pr_trace(fmt, ...) \
     printf("cpu: " fmt, ##__VA_ARGS__)
 
 /* From locore.S - low level processor init */
 extern void md_cpu_init(void);
+extern struct gdt_entry g_GDT[GDT_ENTRY_COUNT];
 
 /*
  * Print information about the bootstrap
@@ -113,9 +116,17 @@ cpu_get_info(struct cpu_info *ci)
 void
 mu_cpu_preinit(struct cpu_info *ci)
 {
+    struct mcb *mcb;
+
     if (ci == NULL) {
         return;
     }
+
+    mcb = &ci->mcb;
+    memcpy(mcb->gdt, g_GDT, sizeof(mcb->gdt));
+    mcb->gdtr.limit = sizeof(g_GDT) - 1;
+    mcb->gdtr.offset = (uintptr_t)&mcb->gdt;
+    gdt_load(&mcb->gdtr);
 
     /* Default to an ID of zero [BSP] */
     ci->id = 0;

@@ -13,6 +13,7 @@
 #define _MACHINE_MCB_H_ 1
 
 #include <sys/types.h>
+#include <machine/gdt.h>
 
 /*
  * The machine core block contains MD processor
@@ -30,6 +31,8 @@ struct mcb {
     void *lapic_mmio;
     uint8_t x2apic_enabled : 1;
     size_t lapic_tmr_freq;
+    struct gdt_entry gdt[GDT_ENTRY_COUNT];
+    struct gdtr gdtr;
 };
 
 #endif  /* !_MACHINE_MCB_H_ */
