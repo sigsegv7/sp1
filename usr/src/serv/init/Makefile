@@ -15,6 +15,7 @@ OFILES = $(CFILES:.c=.o)
 CC = $(SYS_CC)
 CFLAGS = $(SYS_CFLAGS) -I../../head -D_SP1_SOURCE
 OUTPUT_FILE = ../../data/boot/init.sys
+LIB_FILES = $(shell find ../../lib/libc/ -name "*.o")
 
 CFLAGS = 			\
 	-I../../head    \
@@ -25,7 +26,7 @@ all: $(OUTPUT_FILE)
 
 .PHONY: $(OUTPUT_FILE)
 $(OUTPUT_FILE): $(OFILES)
-	ld $(OFILES) -T../link.ld -o $@
+	ld $(OFILES) $(LIB_FILES) -T../link.ld -o $@
 
 %.o: %.c
 	$(CC) -c $< $(CFLAGS) -o $@

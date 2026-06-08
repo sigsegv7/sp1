@@ -9,15 +9,19 @@
 # consent from Mirocom Laboratories.
 #
 
-include ../mk/sys.mk
+CFILES = $(shell find . -name "*.c")
+ASMFILES = $(shell find crt/$(ARCH_TARGET) -name "*.S")
+ASMOFILES = $(ASMFILES:.S=.S.o)
+OFILES = $(CFILES:.c=.o)
+
+CC = $(SYS_CC)
+CFLAGS = $(SYS_CFLAGS) -I../../head -D_SP1_SOURCE
 
 .PHONY: all
-all: libstr libc
+all: $(OFILES) $(ASMOFILES)
 
-.PHONY: libstr
-libstr:
-	cd libstr/; $(MAKE) $(PASSDOWN_ARGS)
+%.o: %.c
+	$(CC) -c $< $(CFLAGS) -o $@
 
-.PHONY: libc
-libc:
-	cd libc/; $(MAKE) $(PASSDOWN_ARGS)
+%.S.o: %.S
+	$(CC) -c $< $(CFLAGS) -o $@
