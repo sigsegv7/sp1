@@ -21,17 +21,24 @@
 #define TASK_USER  BIT(0)   /* Is a user task */
 #define TASK_RUN   BIT(1)   /* Task is running */
 
+/* Stack */
+#define BASE_STACK_SIZE 8192
+
 /*
  * Represents a runnable task in a user/kernel context.
  *
  * @pid:    Process ID of task
  * @flags:  Task flags
  * @pcb:    Process control block
+ * @stack_base: Task stack base
+ * @stack_size: Task stack size
  */
 struct task {
     pid_t pid;
     uint32_t flags;
     struct pcb pcb;
+    uintptr_t stack_base;
+    size_t stack_size;
 };
 
 /*
