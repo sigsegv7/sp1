@@ -20,6 +20,14 @@
         call md_idt_set_gate
     .endm
 
+    .macro set_uint vector isr ist
+        mov $\vector, %rdi
+        lea \isr(%rip), %rsi
+        mov $IDT_USER_GATE, %rdx
+        mov $\ist, %rcx
+        call md_idt_set_gate
+    .endm
+
     .macro push_trapframe vector
         .if \vector == 10 || \vector == 11 || \vector == 12 || \vector == 13 \
             || \vector == 14
@@ -92,6 +100,7 @@ md_set_vectors:
     set_trap 0x0C, ss_fault, 0
     set_trap 0x0D, gpf, 0
     set_trap 0x0E, page_fault, 0
+    set_uint 0x80, syscall_entry, 0
 
     pop %rbp
     pop %rbx
@@ -252,4 +261,14 @@ lapic_tmr_isr:
     pop_trapframe 0x81
     mov $9000, %rdi
     call lapic_timer_oneshot_us
+    iretq
+
+    .globl syscall_entry
+syscall_entry:
+    KFENCE
+    push_trapframe 0x80
+    mov %rsp, %rdi
+    call trap_dispatch
+    pop_trapframe 0x80
+    KFENCE
     iretq

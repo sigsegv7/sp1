@@ -33,10 +33,21 @@ static const char *traptab[] = {
     [TRAP_PF]     = "page fault"
 };
 
+static void
+trap_syscall(struct trapframe *tf)
+{
+    knot("syscall trapped - todo\n");
+}
+
 void
 trap_dispatch(struct trapframe *tf)
 {
     const char *str;
+
+    if (tf->vector == 0x80) {
+        trap_syscall(tf);
+        return;
+    }
 
     if (tf->vector >= NELEM(traptab)) {
         knot("fatal unknown vector %x\n", tf->vector);
