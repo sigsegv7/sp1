@@ -15,6 +15,8 @@
 #include <sys/types.h>
 #include <sys/cdefs.h>
 
+struct cpu_info;
+
 /*
  * 64-bit task state segment entry used to store
  * kernel stacks.
@@ -49,26 +51,39 @@ struct __packed tss_entry {
     uint16_t io_map;
 };
 
-/*
- * Represents a 64-bit TSS descriptor
- */
 struct __packed tss_desc {
-    uint16_t limit_low;
-    uint16_t base_low;
-    uint8_t base_mid7;
-    uint8_t type : 4;
-    uint8_t zero : 1;
-    uint8_t dpl  : 2;
-    uint8_t p    : 1;
-    uint8_t limit_high : 4;
-    uint8_t avl : 1;
-    uint8_t zero1 : 2;
-    uint8_t g : 1;
-    uint8_t base_mid;
-    uint32_t base_high;
-    uint8_t reserved;
-    uint8_t zero2 : 5;
-    uint32_t reserved1;
+    uint16_t seglimit;
+    uint16_t base_lo16;
+    uint8_t base_mid8;
+    uint8_t type        : 4;
+    uint8_t zero        : 1;
+    uint8_t dpl         : 2;
+    uint8_t p           : 1;
+    uint8_t seglimit_hi : 4;
+    uint8_t avl         : 1;
+    uint8_t unused      : 2;
+    uint8_t g           : 1;
+    uint8_t base_hi_mid8;
+    uint32_t base_hi32;
+    uint32_t reserved;
 };
+
+__always_inline static inline void
+tss_load(void)
+{
+    __asmv(
+        "str %ax\n"
+        "mov $0x2B, %ax\n"
+        "ltr %ax"
+    );
+}
+
+/*
+ * Write the data to the TSS
+ *
+ * @ci: Current processor information
+ * @desc: TSS descriptor
+ */
+void write_tss(struct cpu_info *ci, struct tss_desc *desc);
 
 #endif  /* !_MACHINE_TSS_H_ */

@@ -14,6 +14,7 @@
 #include <os/schedvar.h>
 #include <machine/cpuid.h>
 #include <machine/idt.h>
+#include <machine/tss.h>
 #include <machine/lapic.h>
 #include <machine/msr.h>
 #include <machine/mcb.h>
@@ -122,12 +123,6 @@ mu_cpu_preinit(struct cpu_info *ci)
         return;
     }
 
-    mcb = &ci->mcb;
-    memcpy(mcb->gdt, g_GDT, sizeof(mcb->gdt));
-    mcb->gdtr.limit = sizeof(g_GDT) - 1;
-    mcb->gdtr.offset = (uintptr_t)&mcb->gdt;
-    gdt_load(&mcb->gdtr);
-
     /* Default to an ID of zero [BSP] */
     ci->id = 0;
 
@@ -163,10 +158,19 @@ mu_this_cpu(void)
 void
 mu_cpu_postinit(struct cpu_info *ci)
 {
+    struct tss_desc *tss_desc;
+    struct mcb *mcb;
+
     if (ci == NULL) {
         return;
     }
 
     /* Initialize the Local APIC unit */
     md_lapic_init(ci);
+
+    /* Load the TSS */
+    mcb = &ci->mcb;
+    tss_desc = (struct tss_desc *)&g_GDT[GDT_TSS_INDEX];
+    write_tss(ci, tss_desc);
+    tss_load();
 }

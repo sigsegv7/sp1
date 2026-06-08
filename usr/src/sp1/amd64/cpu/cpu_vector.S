@@ -245,11 +245,11 @@ page_fault:
 
     .globl lapic_tmr_isr
 lapic_tmr_isr:
-    KFENCE
     push_trapframe 0x81
     mov %rsp, %rdi
     call mu_task_switch
     call lapic_eoi
     pop_trapframe 0x81
-    KFENCE
+    mov $9000, %rdi
+    call lapic_timer_oneshot_us
     iretq

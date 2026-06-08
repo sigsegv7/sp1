@@ -14,6 +14,7 @@
 
 #include <sys/types.h>
 #include <machine/gdt.h>
+#include <machine/tss.h>
 
 /*
  * The machine core block contains MD processor
@@ -24,6 +25,7 @@
  * @lapic_mmio:     xAPIC MMIO base
  * @x2apic_enabled: If set, x2APIC is enabled
  * @lapic_tmr_freq: LAPIC timer frequency
+ * @tss:            Task state segment
  */
 struct mcb {
     uint8_t model_id;
@@ -31,8 +33,7 @@ struct mcb {
     void *lapic_mmio;
     uint8_t x2apic_enabled : 1;
     size_t lapic_tmr_freq;
-    struct gdt_entry gdt[GDT_ENTRY_COUNT];
-    struct gdtr gdtr;
+    struct tss_entry *tss;
 };
 
 #endif  /* !_MACHINE_MCB_H_ */
