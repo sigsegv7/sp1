@@ -17,8 +17,6 @@
 #include <os/knot.h>
 #include <string.h>
 
-#include <lib/printf.h>
-
 static struct bpt_module initrd_mod;
 
 #define REF_MAGIC "CUMHOLE"
