@@ -16,7 +16,7 @@ ASMOFILES = $(ASMFILES:.S=.S.o)
 OFILES = $(CFILES:.c=.o)
 
 MISC_OFILES = $(shell find ../ -name "*.o")
-LIB_OFILES = $(shell find ../../lib/ -name "*.o")
+LIB_OFILES = $(shell find ../../lib/libstr -name "*.o")
 
 CC = 				\
 	$(SYS_CC)
