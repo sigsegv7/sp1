@@ -21,7 +21,7 @@
  */
 struct __packed trapframe {
     /* Pushed by us */
-    uint64_t vector;;
+    uint64_t vector;
     uint64_t rax;
     uint64_t rbx;
     uint64_t rcx;

@@ -9,23 +9,23 @@
 # consent from Mirocom Laboratories.
 #
 
-include mk/sys.mk
+CFILES = $(shell find . -name "*.c")
+OFILES = $(CFILES:.c=.o)
+
+CC = $(SYS_CC)
+CFLAGS = $(SYS_CFLAGS) -I../../head -D_SP1_SOURCE
+OUTPUT_FILE = ../../data/boot/init.sys
+
+CFLAGS = 			\
+	-I../../head    \
+	$(SYS_CFLAGS)
 
 .PHONY: all
-all: lib sp1 serv boot
+all: $(OUTPUT_FILE)
 
-.PHONY: lib
-lib:
-	cd lib/; $(MAKE)
+.PHONY: $(OUTPUT_FILE)
+$(OUTPUT_FILE): $(OFILES)
+	ld $(OFILES) -T../link.ld -o $@
 
-.PHONY: boot
-boot:
-	cd boot/; $(MAKE)
-
-.PHONY: serv
-serv:
-	cd serv/; $(MAKE)
-
-.PHONY: sp1
-sp1:
-	cd sp1/; $(MAKE) $(PASSDOWN_ARGS)
+%.o: %.c
+	$(CC) -c $< $(CFLAGS) -o $@

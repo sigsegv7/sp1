@@ -17,9 +17,12 @@
 #include <os/task.h>
 #include <os/driver.h>
 #include <os/initrd.h>
+#include <os/sched.h>
+#include <os/loadelf.h>
 #include <lib/printf.h>
 #include <mu/cpu.h>
 #include <mu/task.h>
+#include <mu/mmu.h>
 #include <mm/physmem.h>
 #include <mm/vm.h>
 #include <mm/kalloc.h>
@@ -44,9 +47,45 @@ boot_banner(void)
     printf("i love you, you matter - stay, stay\n");
 }
 
+static struct task *
+start_init(void)
+{
+    struct loaded_elf elf;
+    struct cpu_info *ci;
+    struct task *task;
+    struct initrd_file file;
+    status_t status;
+
+    task = kalloc(sizeof(*task));
+    if (task == NULL) {
+        knot("failed to start init system\n");
+    }
+
+    status = task_init(TASK_RUN | TASK_USER, 0, task);
+    if (status != STATUS_SUCCESS) {
+        knot("failed to start log task\n");
+    }
+
+    mu_mmu_writevfr(&task->pcb.vfr);
+    status = initrd_lookup("/boot/init.sys", &file);
+    if (status != STATUS_SUCCESS) {
+        knot("failed to find /boot/init.sys\n");
+    }
+
+    status = elf64_load(file.data, &elf);
+    if (status != STATUS_SUCCESS) {
+        knot("failed to load /boot/init.sys\n");
+    }
+
+    mu_task_set_ip(task, elf.entry);
+    return task;
+}
+
 void
 main(void)
 {
+    struct task *root;
+
     /* Initialize the console */
     cons_init(&cons_attr);
 
@@ -86,7 +125,8 @@ main(void)
     /* Initialize the ramdisk */
     initrd_init();
 
+    root = start_init();
+
     /* Enter task mode and don't return !! */
-    knot("scheduler is in construction\n");
-    mu_task_mode(NULL);
+    mu_task_mode(root);
 }
