@@ -9,6 +9,7 @@
  * consent from Mirocom Laboratories.
  */
 
+#include <sys/syscall.h>
 #include <sys/param.h>
 #include <os/knot.h>
 #include <machine/frame.h>
@@ -36,7 +37,21 @@ static const char *traptab[] = {
 static void
 trap_syscall(struct trapframe *tf)
 {
-    knot("syscall trapped - todo\n");
+    struct syscall_args scargs = {
+        .arg0 = tf->rdi,
+        .arg1 = tf->rsi,
+        .arg2 = tf->rdx,
+        .arg3 = tf->r10,
+        .arg4 = tf->r9,
+        .arg5 = tf->r8,
+        .tf = tf
+    };
+
+    if (tf->rax >= MAX_SYSCALLS || tf->rax == 0) {
+        return;
+    }
+
+    tf->rax = g_sctab[tf->rax](&scargs);
 }
 
 void
