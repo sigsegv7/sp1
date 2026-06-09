@@ -142,6 +142,7 @@ elf64_load(void *data, struct loaded_elf *res)
         return STATUS_INVALID_PARAM;
     }
 
+    memset(res, 0, sizeof(*res));
     status = membox_init(&res->membox);
     if (status != STATUS_SUCCESS) {
         return status;
