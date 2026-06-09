@@ -101,6 +101,7 @@ md_set_vectors:
     set_trap 0x0D, gpf, 0
     set_trap 0x0E, page_fault, 0
     set_uint 0x80, syscall_entry, 0
+    set_uint 0x79, yield_isr, 0
 
     pop %rbp
     pop %rbx
@@ -274,3 +275,7 @@ syscall_entry:
     pop_trapframe 0x80
     KFENCE
     iretq
+
+    .globl yield_isr
+yield_isr:
+    jmp lapic_tmr_isr

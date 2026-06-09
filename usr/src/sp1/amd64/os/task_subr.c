@@ -124,8 +124,20 @@ mu_task_switch(struct trapframe *framep)
 
     ci = mu_this_cpu();
 
-    /* Grab the next task and enqueue this one */
-    task = sched_task_dequeue(&ci->runq);
+    /* Skip non-runnable tasks */
+    do {
+        /* Grab the next task and enqueue this one */
+        task = sched_task_dequeue(&ci->runq);
+        if (task == NULL) {
+            break;
+        }
+
+        if (!ISSET(task->flags, TASK_RUN)) {
+            sched_task_enqueue(&ci->runq, ci->cur_task);
+            continue;
+        }
+    } while (!ISSET(task->flags, TASK_RUN));
+
     if (ci->cur_task != NULL && task != NULL) {
         sched_task_enqueue(&ci->runq, ci->cur_task);
     }
@@ -136,6 +148,12 @@ mu_task_switch(struct trapframe *framep)
 
     ci->cur_task = task;
     task_switch(framep, task);
+}
+
+void
+mu_task_yield(void)
+{
+    __asmv("int $0x79" ::: "memory");
 }
 
 __no_return void

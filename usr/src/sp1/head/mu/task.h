@@ -46,6 +46,11 @@ void mu_task_set_ip(struct task *task, uintptr_t ip);
 void mu_task_kick(struct task *task);
 
 /*
+ * Yield the current task
+ */
+void mu_task_yield(void);
+
+/*
  * Enter tasking mode
  *
  * @root: Root task
