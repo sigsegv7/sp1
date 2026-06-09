@@ -77,6 +77,7 @@ elf64_do_load(Elf64_Ehdr *eh, struct loaded_elf *res)
     status_t status;
     Elf64_Phdr *phdr;
     struct mmu_vfr cur_vfr;
+    struct elf_range *range;
     struct vm_map map;
     size_t misalign, map_len;
     uintptr_t pma;
@@ -98,6 +99,12 @@ elf64_do_load(Elf64_Ehdr *eh, struct loaded_elf *res)
         phdr = PHDR_I(i);
         switch (phdr->p_type) {
         case PT_LOAD:
+            if (res->range_count >= PHDR_MAX) {
+                pr_trace("too many program headers\n");
+                membox_destroy(&res->membox);
+                return STATUS_NOT_EXEC;
+            }
+
             if (ISSET(phdr->p_flags, PF_W))
                 prot |= PROT_WRITE;
             if (ISSET(phdr->p_flags, PF_X))
@@ -124,12 +131,42 @@ elf64_do_load(Elf64_Ehdr *eh, struct loaded_elf *res)
                 return status;
             }
 
+            range = &res->range[res->range_count++];
+            range->base_pma = pma;
+            range->base_vma = phdr->p_vaddr;
+            range->length = map_len;
+
             data = PTR_OFFSET(eh, phdr->p_offset);
             memcpy(tmp_p, data, phdr->p_filesz);
         }
     }
 #undef PHDR_I
     return STATUS_SUCCESS;
+}
+
+bool
+elf_vrange_good(struct loaded_elf *elf, uintptr_t vbase, size_t length)
+{
+    uintptr_t highest_range = 0;
+    struct elf_range *range;
+    uintptr_t start, end;
+    bool range_good = false;
+
+    if (elf == NULL) {
+        return false;
+    }
+
+    start = vbase;
+    end = vbase + length;
+
+    for (uint8_t i = 0; i < elf->range_count; ++i) {
+        range = &elf->range[i];
+        if (start >= range->base_vma && end < range->base_vma + range->length) {
+            range_good = true;
+        }
+    }
+
+    return range_good;
 }
 
 status_t
