@@ -11,17 +11,18 @@
 
 #include <sys/cdefs.h>
 
+const char msg[] = "~ slutty init v0.0.1 - halted ~\n";
+
 int
 main(void)
 {
-    const char *msg = "~ slutty init v0.0.1 - halted ~\n";
-
     __asmv(
         "mov $0x01, %%rax;\n\t"
          "mov %0, %%rdi;\n\t"
+         "mov %1, %%rsi\n\t"
          "int $0x80"
         :
-        : "r" (msg)
+        : "r" (msg), "r" (sizeof(msg))
         : "rax", "memory"
     );
     return 0;

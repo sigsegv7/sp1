@@ -77,6 +77,7 @@ start_init(void)
         knot("failed to load /boot/init.sys\n");
     }
 
+    task->x_snapshot = elf;
     mu_task_set_ip(task, elf.entry);
     return task;
 }

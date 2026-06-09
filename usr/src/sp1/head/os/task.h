@@ -17,6 +17,7 @@
 #include <sys/status.h>
 #include <sys/types.h>
 #include <os/schedvar.h>
+#include <os/loadelf.h>
 #include <mu/pcb.h>
 
 /* Task flags */
@@ -34,6 +35,7 @@
  * @pcb:    Process control block
  * @stack_base: Task stack base
  * @stack_size: Task stack size
+ * @x_snapshot: Executable snapshot
  * @runq_link:  Queue link
  */
 struct task {
@@ -42,6 +44,7 @@ struct task {
     struct pcb pcb;
     uintptr_t stack_base;
     size_t stack_size;
+    struct loaded_elf x_snapshot;
     TAILQ_ENTRY(task) runq_link;
 };
 

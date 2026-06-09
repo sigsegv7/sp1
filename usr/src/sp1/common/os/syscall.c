@@ -12,16 +12,35 @@
 #include <sys/param.h>
 #include <sys/syscall.h>
 #include <lib/printf.h>
+#include <os/task.h>
+#include <mu/cpu.h>
 
 static scret_t
 sys_syslog(struct syscall_args *args)
 {
+    struct cpu_info *ci;
+    struct task *cur_task;
+    bool range_good;
+    const char *p;
+
     if (args == NULL) {
         return 0;
     }
 
-    /* TODO: CHECK THIS ADDRESS */
-    printf("%s", (const char *)args->arg0);
+    if ((ci = mu_this_cpu()) == NULL) {
+        return 0;
+    }
+
+    cur_task = ci->cur_task;
+    range_good = elf_vrange_good(&cur_task->x_snapshot, args->arg0, args->arg1);
+
+    if (range_good) {
+        p = (const char *)args->arg0;
+        for (int i = 0; i < args->arg1; ++i) {
+            printf("%c", p[i]);
+        }
+    }
+
     return 0;
 }
 
