@@ -47,6 +47,7 @@ mu_task_kick(struct task *task)
         "test $3, %%ax\n"
         "jz 1f\n"
         "lfence\n"
+        "swapgs\n"
         "1:\n"
         "   iretq"
         :
